@@ -13,7 +13,7 @@ from agent.ingester import RepoIngester
 from agent.llm_client import LLMClient
 from agent.reporter import BugReporter
 from agent.runner import TestRunner
-from auth import show_login_page
+from auth import show_admin_panel, show_login_page, show_user_history
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
@@ -301,15 +301,11 @@ def main() -> None:
     current_page = st.session_state.get("nav_page", "Run Scan")
 
     if current_page == "My History":
-        from auth import show_user_history
-
         st.markdown("## My Scan History")
         show_user_history()
         st.stop()
 
     if current_page == "Admin Panel" and st.session_state.get("is_admin", False):
-        from auth import show_admin_panel
-
         show_admin_panel()
         st.stop()
 

@@ -191,3 +191,70 @@ def show_login_page() -> None:
                     st.success("Account created! Please login.")
                 else:
                     st.error("Username already taken")
+
+
+def show_user_history():
+    """Display scan history for the current user."""
+    from database import get_user_history
+    import streamlit as st
+
+    history = get_user_history(st.session_state.username)
+    if not history:
+        st.info("No scan history yet. Run your first scan!")
+        return
+
+    for i, scan in enumerate(history):
+        with st.expander(
+            f"Scan {i + 1} | "
+            f"{str(scan.get('scanned_at', ''))[:16]} | "
+            f"Bugs Found: {scan.get('bugs_found', 0)}"
+        ):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Weak Points", scan.get("weak_points_found", 0))
+            with col2:
+                st.metric("Bugs Found", scan.get("bugs_found", 0))
+            if scan.get("report_content"):
+                st.markdown("**Report Preview:**")
+                st.markdown(scan["report_content"][:500] + "...")
+
+
+def show_admin_panel():
+    """Display admin analytics and tables."""
+    from database import get_all_scans, get_all_users, get_stats
+    import pandas as pd
+    import streamlit as st
+
+    st.markdown("## Admin Panel")
+
+    stats = get_stats()
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Users", stats["total_users"])
+    with col2:
+        st.metric("Total Scans", stats["total_scans"])
+    with col3:
+        st.metric("Total Bugs Found", stats["total_bugs"])
+
+    st.markdown("---")
+    tab1, tab2 = st.tabs(["All Users", "All Scans"])
+
+    with tab1:
+        users = get_all_users()
+        if users:
+            df = pd.DataFrame(users)
+            df = df[["username", "email", "is_admin", "created_at"]]
+            df.columns = ["Username", "Email", "Admin", "Joined"]
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.info("No users found")
+
+    with tab2:
+        scans = get_all_scans()
+        if scans:
+            df = pd.DataFrame(scans)
+            df = df[["username", "weak_points_found", "bugs_found", "scanned_at"]]
+            df.columns = ["User", "Weak Points", "Bugs Found", "Scanned At"]
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.info("No scans found")
