@@ -160,6 +160,11 @@ def show_login_page() -> None:
                 key="reg_user",
                 placeholder="Enter username",
             )
+            new_email = st.text_input(
+                "Gmail Address",
+                key="reg_email",
+                placeholder="yourname@gmail.com",
+            )
             new_pass = st.text_input(
                 "Choose Password",
                 type="password",
@@ -174,8 +179,10 @@ def show_login_page() -> None:
             )
 
             if st.button("Create Account", key="reg_btn"):
-                if not new_user or not new_pass or not confirm_pass:
+                if not new_user or not new_email or not new_pass or not confirm_pass:
                     st.error("Please fill in all fields")
+                elif not new_email.lower().endswith("@gmail.com"):
+                    st.error("Email must be a Gmail address")
                 elif len(new_pass) < 6:
                     st.error("Password must be at least 6 characters")
                 elif new_pass != confirm_pass:
