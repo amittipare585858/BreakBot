@@ -35,7 +35,7 @@ class LLMClient:
             raise ValueError("GEMINI_API_KEY not found in secrets or .env")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        self.model = genai.GenerativeModel(model_name="gemini-pro")
 
     def _clean_response(self, text: str) -> str:
         """Strip markdown code fences from the Gemini response."""
