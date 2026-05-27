@@ -13,7 +13,7 @@ from agent.ingester import RepoIngester
 from agent.llm_client import LLMClient
 from agent.reporter import BugReporter
 from agent.runner import TestRunner
-from auth import show_admin_panel, show_login_page, show_user_history
+from auth import show_login_page
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
@@ -275,38 +275,103 @@ def main() -> None:
 
         st.markdown("---")
         st.markdown("**Navigation**")
-
-        if st.session_state.get("is_admin", False):
-            nav_options = ["Run Scan", "My History", "Admin Panel"]
-        else:
-            nav_options = ["Run Scan", "My History"]
-
-        if "nav_page" not in st.session_state:
+        if st.button("Run Scan", key="nav_scan"):
             st.session_state.nav_page = "Run Scan"
-
-        for option in nav_options:
-            if st.button(option, key=f"nav_{option}"):
-                st.session_state.nav_page = option
+            st.rerun()
+        if st.button("My History", key="nav_history"):
+            st.session_state.nav_page = "My History"
+            st.rerun()
+        if st.session_state.get("is_admin", False):
+            if st.button("Admin Panel", key="nav_admin"):
+                st.session_state.nav_page = "Admin Panel"
                 st.rerun()
-
         st.markdown("---")
 
         st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
         st.markdown("**Input Mode**")
-        mode = st.radio("", ["GitHub Repo", "Paste Code"], label_visibility="collapsed")
+        mode = st.radio(
+            "",
+            ["GitHub Repo", "Paste Code"],
+            index=1,
+            label_visibility="collapsed",
+        )
 
         st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
         st.markdown("Powered by Google Gemini", unsafe_allow_html=True)
 
-    current_page = st.session_state.get("nav_page", "Run Scan")
+    if "nav_page" not in st.session_state:
+        st.session_state.nav_page = "Run Scan"
 
-    if current_page == "My History":
+    if st.session_state.nav_page == "My History":
         st.markdown("## My Scan History")
-        show_user_history()
+        try:
+            from database import get_user_history
+
+            history = get_user_history(st.session_state.username)
+            if not history:
+                st.info("No scans yet! Run your first scan.")
+            else:
+                for i, scan in enumerate(history):
+                    with st.expander(
+                        f"Scan {i + 1} | "
+                        f"{str(scan.get('scanned_at', ''))[:16]}"
+                        f" | Bugs: {scan.get('bugs_found', 0)}"
+                    ):
+                        c1, c2 = st.columns(2)
+                        with c1:
+                            st.metric(
+                                "Weak Points",
+                                scan.get("weak_points_found", 0),
+                            )
+                        with c2:
+                            st.metric(
+                                "Bugs Found",
+                                scan.get("bugs_found", 0),
+                            )
+                        if scan.get("report_content"):
+                            st.markdown(scan["report_content"][:500])
+        except Exception as e:
+            st.error(f"Could not load history: {e}")
         st.stop()
 
-    if current_page == "Admin Panel" and st.session_state.get("is_admin", False):
-        show_admin_panel()
+    if st.session_state.nav_page == "Admin Panel":
+        if st.session_state.get("is_admin", False):
+            st.markdown("## Admin Panel")
+            try:
+                from database import get_all_scans, get_all_users, get_stats
+                import pandas as pd
+
+                stats = get_stats()
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    st.metric("Users", stats["total_users"])
+                with c2:
+                    st.metric("Scans", stats["total_scans"])
+                with c3:
+                    st.metric("Bugs", stats["total_bugs"])
+                st.markdown("---")
+                t1, t2 = st.tabs(["Users", "Scans"])
+                with t1:
+                    users = get_all_users()
+                    if users:
+                        df = pd.DataFrame(users)[
+                            ["username", "email", "is_admin", "created_at"]
+                        ]
+                        st.dataframe(df, use_container_width=True)
+                with t2:
+                    scans = get_all_scans()
+                    if scans:
+                        df = pd.DataFrame(scans)[
+                            [
+                                "username",
+                                "weak_points_found",
+                                "bugs_found",
+                                "scanned_at",
+                            ]
+                        ]
+                        st.dataframe(df, use_container_width=True)
+            except Exception as e:
+                st.error(f"Admin panel error: {e}")
         st.stop()
 
     _ = LLMClient
