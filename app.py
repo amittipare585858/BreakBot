@@ -179,6 +179,7 @@ def init_state() -> None:
     """Initialize persistent Streamlit session state values."""
     defaults = {
         "repo_data": None,
+        "original_code": "",
         "analysis": None,
         "test_code": None,
         "test_file_path": str(Path("temp") / "breakbot_tests.py"),
@@ -388,6 +389,7 @@ def main() -> None:
             if st.button("Ingest Repo", type="primary"):
                 with st.spinner("Ingesting repository..."):
                     st.session_state.repo_data = ingester.ingest_github(repo_url)
+                    st.session_state["original_code"] = original_code()
                     st.session_state.analysis = None
                     st.session_state.test_code = None
                     st.session_state.test_results = None
@@ -402,6 +404,7 @@ def main() -> None:
             filename = st.text_input("Filename", value="pasted_code.py")
             if st.button("Analyze Code", type="primary"):
                 st.session_state.repo_data = ingester.ingest_code(raw_code, filename)
+                st.session_state["original_code"] = raw_code
                 st.session_state.analysis = None
                 st.session_state.test_code = None
                 st.session_state.test_results = None
@@ -478,7 +481,23 @@ def main() -> None:
 
         if st.session_state.report_markdown:
             st.subheader("Bug Attack Report")
-            st.markdown(st.session_state.report_markdown)
+            report = st.session_state.report_markdown
+            st.markdown(report)
+            # Save scan to history
+            try:
+                from database import save_scan_history
+
+                save_scan_history(
+                    username=st.session_state.get("username", ""),
+                    code_snippet=st.session_state.get("original_code", "")[:500],
+                    weak_points=len(
+                        st.session_state.get("analysis", {}).get("weak_points", [])
+                    ),
+                    bugs=st.session_state.get("test_results", {}).get("failed", 0),
+                    report=report if isinstance(report, str) else str(report),
+                )
+            except Exception as e:
+                print(f"Could not save history: {e}")
             report_path = st.session_state.report_path
             if report_path and Path(report_path).exists():
                 st.download_button(
