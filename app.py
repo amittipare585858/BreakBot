@@ -13,10 +13,166 @@ from agent.ingester import RepoIngester
 from agent.llm_client import LLMClient
 from agent.reporter import BugReporter
 from agent.runner import TestRunner
+from auth import show_login_page
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def apply_theme() -> None:
+    """Inject the BreakBot premium dark UI styles."""
+    st.markdown(
+        """
+<style>
+/* Global */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+* { font-family: 'Space Grotesk', sans-serif; }
+
+.stApp {
+    background: #0a0a0f;
+    color: #ffffff;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: #0d0d1a;
+    border-right: 1px solid #ff3b3b30;
+}
+
+/* Buttons */
+.stButton > button {
+    background: linear-gradient(135deg, #ff3b3b, #cc0000);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+.stButton > button:hover {
+    background: linear-gradient(135deg, #ff5555, #ee0000);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 59, 59, 0.4);
+}
+
+/* Input fields */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: #1a1a2e;
+    border: 1px solid #ff3b3b30;
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #ff3b3b;
+    box-shadow: 0 0 0 2px rgba(255, 59, 59, 0.2);
+}
+
+/* Cards */
+.bb-card {
+    background: #16213e;
+    border: 1px solid #ff3b3b20;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 12px 0;
+}
+
+/* Step headers */
+.bb-step {
+    background: linear-gradient(135deg, #1a0a0a, #2a0a0a);
+    border-left: 4px solid #ff3b3b;
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 20px 0 16px 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Metrics */
+.bb-metric {
+    background: #16213e;
+    border: 1px solid #ff3b3b20;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+.bb-metric-value {
+    font-size: 42px;
+    font-weight: 700;
+    color: #ff3b3b;
+}
+.bb-metric-label {
+    font-size: 13px;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Logo */
+.bb-logo {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff3b3b, #ff8080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+/* Badge */
+.bb-badge {
+    display: inline-block;
+    background: #ff3b3b20;
+    border: 1px solid #ff3b3b50;
+    color: #ff6b6b;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    margin: 4px;
+}
+
+/* Divider */
+.bb-divider {
+    border: none;
+    border-top: 1px solid #ff3b3b15;
+    margin: 24px 0;
+}
+
+/* Success/fail colors */
+.bb-pass { color: #00ff88; }
+.bb-fail { color: #ff3b3b; }
+
+/* Code blocks */
+.stCodeBlock { border-radius: 8px; }
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: #16213e;
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+/* Radio buttons */
+.stRadio > div { gap: 10px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb {
+    background: #ff3b3b50;
+    border-radius: 3px;
+}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
 
 
 def init_state() -> None:
@@ -44,78 +200,85 @@ def original_code() -> str:
     )
 
 
-def severity_badge(item: object) -> str:
-    """Render a colored weak-point badge based on severity."""
-    if isinstance(item, dict):
-        severity = str(item.get("severity", "medium")).lower()
-        label = item.get("description") or item.get("name") or item.get("type") or str(item)
-    else:
-        severity = "medium"
-        label = str(item)
-
-    prefix = "[MED]"
-    color = "#facc15"
-    if severity == "high":
-        prefix = "[HIGH]"
-        color = "#fb7185"
-    elif severity == "low":
-        prefix = "[LOW]"
-        color = "#4ade80"
-
-    return (
-        f"<span class='badge' style='border-color:{color}; color:{color};'>"
-        f"{prefix} {label}</span>"
-    )
+def render_step(title: str) -> None:
+    """Render a styled step header."""
+    st.markdown(f'<div class="bb-step">{title}</div>', unsafe_allow_html=True)
 
 
-def apply_theme() -> None:
-    """Apply a compact dark visual theme to the Streamlit app."""
-    st.markdown(
-        """
-        <style>
-        .stApp {
-            background: #0b1020;
-            color: #e5e7eb;
-        }
-        [data-testid="stSidebar"] {
-            background: #111827;
-        }
-        .block-container {
-            max-width: 1180px;
-            padding-top: 2rem;
-        }
-        .metric-card {
-            border: 1px solid #263244;
-            background: #111827;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .badge {
-            display: inline-block;
-            border: 1px solid;
-            border-radius: 999px;
-            padding: 0.25rem 0.55rem;
-            margin: 0.2rem 0.25rem 0.2rem 0;
-            background: #0f172a;
-            font-size: 0.9rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+def render_badges(points: list) -> None:
+    """Render weak points as badge HTML."""
+    for point in points:
+        label = point
+        if isinstance(point, dict):
+            label = point.get("description") or point.get("name") or point.get("type") or str(point)
+        st.markdown(f'<span class="bb-badge">{label}</span>', unsafe_allow_html=True)
+
+
+def render_metrics(total: int, passed: int, failed: int) -> None:
+    """Render test result metrics as custom cards."""
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(
+            f"""
+    <div class="bb-metric">
+        <div class="bb-metric-value">{total}</div>
+        <div class="bb-metric-label">Total Tests</div>
+    </div>""",
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown(
+            f"""
+    <div class="bb-metric">
+        <div class="bb-metric-value bb-pass">{passed}</div>
+        <div class="bb-metric-label">Passed</div>
+    </div>""",
+            unsafe_allow_html=True,
+        )
+    with col3:
+        st.markdown(
+            f"""
+    <div class="bb-metric">
+        <div class="bb-metric-value bb-fail">{failed}</div>
+        <div class="bb-metric-label">Failed</div>
+    </div>""",
+            unsafe_allow_html=True,
+        )
 
 
 def main() -> None:
     """Run the BreakBot Streamlit UI."""
     st.set_page_config(page_title="BreakBot", page_icon="BB", layout="wide")
+
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+    if "username" not in st.session_state:
+        st.session_state.username = ""
+
+    if not st.session_state.logged_in:
+        show_login_page()
+        st.stop()
+
     apply_theme()
     init_state()
 
     with st.sidebar:
-        st.title("BreakBot")
-        st.caption("AI Red-Team Agent")
-        input_mode = st.radio("Input mode", ["GitHub Repo", "Paste Code"])
-        st.caption("Powered by Google Gemini")
+        st.markdown('<div class="bb-logo">BREAK BOT</div>', unsafe_allow_html=True)
+        st.markdown("**AI Red-Team Agent**")
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+
+        st.markdown(f"Logged in as: **{st.session_state.username}**")
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.rerun()
+
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+        st.markdown("**Input Mode**")
+        mode = st.radio("", ["GitHub Repo", "Paste Code"], label_visibility="collapsed")
+
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+        st.markdown("Powered by Google Gemini", unsafe_allow_html=True)
 
     _ = LLMClient
     ingester = RepoIngester()
@@ -124,9 +287,9 @@ def main() -> None:
     runner = TestRunner()
     reporter = BugReporter()
 
-    st.header("Step 1: Input")
+    render_step("Step 1: Input")
     try:
-        if input_mode == "GitHub Repo":
+        if mode == "GitHub Repo":
             repo_url = st.text_input("Repository URL", placeholder="https://github.com/user/repo")
             if st.button("Ingest Repo", type="primary"):
                 with st.spinner("Ingesting repository..."):
@@ -137,7 +300,11 @@ def main() -> None:
                     st.session_state.report_markdown = None
                 st.success(f"Ingested {st.session_state.repo_data['repo_name']}")
         else:
-            raw_code = st.text_area("Code", height=260, placeholder="def divide(a, b):\n    return a / b")
+            raw_code = st.text_area(
+                "Code",
+                height=260,
+                placeholder="def divide(a, b):\n    return a / b",
+            )
             filename = st.text_input("Filename", value="pasted_code.py")
             if st.button("Analyze Code", type="primary"):
                 st.session_state.repo_data = ingester.ingest_code(raw_code, filename)
@@ -151,8 +318,8 @@ def main() -> None:
         st.error(str(exc))
 
     if st.session_state.repo_data:
-        st.divider()
-        st.header("Step 2: Analysis")
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+        render_step("Step 2: Analysis")
         if st.session_state.analysis is None:
             try:
                 with st.spinner("[*] Reading your code..."):
@@ -165,14 +332,13 @@ def main() -> None:
             with st.expander("Analysis results", expanded=True):
                 weak_points = (st.session_state.analysis or {}).get("weak_points", [])
                 if weak_points:
-                    badges = "".join(severity_badge(item) for item in weak_points)
-                    st.markdown(badges, unsafe_allow_html=True)
+                    render_badges(weak_points)
                 else:
                     st.info("No weak points were returned.")
                 st.json(st.session_state.analysis)
 
-        st.divider()
-        st.header("Step 3: Attack")
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+        render_step("Step 3: Attack")
         if st.button("Launch Attack"):
             try:
                 with st.spinner("[!] Generating adversarial cases..."):
@@ -189,8 +355,8 @@ def main() -> None:
         if st.session_state.test_code:
             st.code(st.session_state.test_code, language="python")
 
-        st.divider()
-        st.header("Step 4: Run & Report")
+        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+        render_step("Step 4: Run & Report")
         if st.button("Run Tests", disabled=not bool(st.session_state.test_code)):
             try:
                 with st.spinner("Running attacks..."):
@@ -209,10 +375,12 @@ def main() -> None:
                 st.error(str(exc))
 
         if st.session_state.test_results:
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Total", (st.session_state.test_results or {}).get("total", 0))
-            col_b.metric("Passed [PASS]", (st.session_state.test_results or {}).get("passed", 0))
-            col_c.metric("Failed [FAIL]", (st.session_state.test_results or {}).get("failed", 0))
+            results = st.session_state.test_results or {}
+            render_metrics(
+                results.get("total", 0),
+                results.get("passed", 0),
+                results.get("failed", 0),
+            )
 
         if st.session_state.report_markdown:
             st.subheader("Bug Attack Report")

@@ -8,3 +8,4 @@ temp/
 *.pyo
 *.pyd
 .env
+users.json
