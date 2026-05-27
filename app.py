@@ -1,91 +1,72 @@
-"""BreakBot Streamlit application."""
-
-from __future__ import annotations
-
-import logging
-from pathlib import Path
-
 import streamlit as st
-
+import os
+from dotenv import load_dotenv
+from agent.ingester import RepoIngester
 from agent.analyzer import CodeAnalyzer
 from agent.attacker import AttackGenerator
-from agent.ingester import RepoIngester
-from agent.llm_client import LLMClient
-from agent.reporter import BugReporter
 from agent.runner import TestRunner
+from agent.reporter import BugReporter
 from auth import show_login_page
+from database import save_scan_history
 
+load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
-logger = logging.getLogger(__name__)
+# ─── SESSION STATE INIT ───────────────────────────────────
+def init_session():
+    defaults = {
+        "logged_in": False,
+        "username": "",
+        "is_admin": False,
+        "user_email": "",
+        "nav_page": "Run Scan",
+        "analysis": {},
+        "attack_code": "",
+        "test_results": {},
+        "report": "",
+        "original_code": "",
+        "ingested_files": [],
+    }
+    for key, val in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = val
 
+init_session()
 
-def apply_theme() -> None:
-    """Inject the BreakBot premium dark UI styles."""
-    st.markdown(
-        """
+# ─── LOGIN GATE ───────────────────────────────────────────
+if not st.session_state.logged_in:
+    show_login_page()
+    st.stop()
+
+# ─── GLOBAL CSS ───────────────────────────────────────────
+st.markdown("""
 <style>
-/* Global */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
-* { font-family: 'Space Grotesk', sans-serif; }
-
-.stApp {
-    background: #0a0a0f;
-    color: #ffffff;
-}
-
-/* Sidebar */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap');
+* { font-family: 'Space Grotesk', sans-serif !important; }
+.stApp { background: #0a0a0f; color: #ffffff; }
 [data-testid="stSidebar"] {
     background: #0d0d1a;
     border-right: 1px solid #ff3b3b30;
 }
-
-/* Buttons */
 .stButton > button {
-    background: linear-gradient(135deg, #ff3b3b, #cc0000);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 24px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    width: 100%;
+    background: linear-gradient(135deg, #ff3b3b, #cc0000) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 10px 20px !important;
 }
 .stButton > button:hover {
-    background: linear-gradient(135deg, #ff5555, #ee0000);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 59, 59, 0.4);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(255,59,59,0.4) !important;
 }
-
-/* Input fields */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea {
-    background: #1a1a2e;
-    border: 1px solid #ff3b3b30;
-    border-radius: 8px;
-    color: #ffffff;
-    font-family: 'Space Grotesk', sans-serif;
+    background: #1a1a2e !important;
+    border: 1px solid #ff3b3b30 !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
 }
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
-    border-color: #ff3b3b;
-    box-shadow: 0 0 0 2px rgba(255, 59, 59, 0.2);
-}
-
-/* Cards */
-.bb-card {
-    background: #16213e;
-    border: 1px solid #ff3b3b20;
-    border-radius: 12px;
-    padding: 24px;
-    margin: 12px 0;
-}
-
-/* Step headers */
-.bb-step {
+.step-header {
     background: linear-gradient(135deg, #1a0a0a, #2a0a0a);
     border-left: 4px solid #ff3b3b;
     border-radius: 0 8px 8px 0;
@@ -93,40 +74,25 @@ def apply_theme() -> None:
     margin: 20px 0 16px 0;
     font-size: 20px;
     font-weight: 700;
-    letter-spacing: 0.5px;
 }
-
-/* Metrics */
-.bb-metric {
+.metric-card {
     background: #16213e;
     border: 1px solid #ff3b3b20;
     border-radius: 10px;
     padding: 20px;
     text-align: center;
 }
-.bb-metric-value {
+.metric-val {
     font-size: 42px;
     font-weight: 700;
     color: #ff3b3b;
 }
-.bb-metric-label {
-    font-size: 13px;
+.metric-label {
+    font-size: 12px;
     color: #a0a0b0;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
-
-/* Logo */
-.bb-logo {
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #ff3b3b, #ff8080);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
-}
-
-/* Badge */
 .bb-badge {
     display: inline-block;
     background: #ff3b3b20;
@@ -135,378 +101,352 @@ def apply_theme() -> None:
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 12px;
-    margin: 4px;
+    margin: 4px 2px;
 }
-
-/* Divider */
-.bb-divider {
-    border: none;
-    border-top: 1px solid #ff3b3b15;
-    margin: 24px 0;
-}
-
-/* Success/fail colors */
-.bb-pass { color: #00ff88; }
-.bb-fail { color: #ff3b3b; }
-
-/* Code blocks */
-.stCodeBlock { border-radius: 8px; }
-
-/* Expander */
-.streamlit-expanderHeader {
-    background: #16213e;
-    border-radius: 8px;
-    color: #ffffff;
-}
-
-/* Radio buttons */
-.stRadio > div { gap: 10px; }
-
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a0f; }
 ::-webkit-scrollbar-thumb {
     background: #ff3b3b50;
     border-radius: 3px;
 }
 </style>
-""",
-        unsafe_allow_html=True,
-    )
+""", unsafe_allow_html=True)
 
+# ─── SIDEBAR ──────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("""
+    <div style='font-size:26px; font-weight:800;
+        background: linear-gradient(135deg, #ff3b3b, #ff8080);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        padding: 10px 0;'>
+        BREAKBOT
+    </div>
+    <div style='color:#a0a0b0; font-size:12px;
+                margin-bottom:10px;'>
+        AI Red-Team Security Agent
+    </div>
+    """, unsafe_allow_html=True)
 
-def init_state() -> None:
-    """Initialize persistent Streamlit session state values."""
-    defaults = {
-        "repo_data": None,
-        "original_code": "",
-        "analysis": None,
-        "test_code": None,
-        "test_file_path": str(Path("temp") / "breakbot_tests.py"),
-        "test_results": None,
-        "fixes": None,
-        "report_markdown": None,
-        "report_path": None,
-    }
-    for key, value in defaults.items():
-        st.session_state.setdefault(key, value)
+    st.markdown("---")
+    st.markdown(f"**{st.session_state.username}**")
+    st.markdown(
+        f"<small style='color:#a0a0b0'>"
+        f"{st.session_state.user_email}</small>",
+        unsafe_allow_html=True)
 
+    st.markdown("---")
+    st.markdown("**Navigation**")
 
-def original_code() -> str:
-    """Return concatenated code from the currently ingested repository data."""
-    repo_data = st.session_state.get("repo_data") or {"files": []}
-    return "\n\n".join(
-        f"# FILE: {file.get('path', 'unknown')}\n{file.get('content', '')}"
-        for file in repo_data.get("files", [])
-    )
+    if st.button("Run Scan", key="nav_scan"):
+        st.session_state.nav_page = "Run Scan"
+        st.rerun()
 
+    if st.button("My History", key="nav_history"):
+        st.session_state.nav_page = "My History"
+        st.rerun()
 
-def render_step(title: str) -> None:
-    """Render a styled step header."""
-    st.markdown(f'<div class="bb-step">{title}</div>', unsafe_allow_html=True)
-
-
-def render_badges(points: list) -> None:
-    """Render weak points as badge HTML."""
-    for point in points:
-        label = point
-        if isinstance(point, dict):
-            label = point.get("description") or point.get("name") or point.get("type") or str(point)
-        st.markdown(f'<span class="bb-badge">{label}</span>', unsafe_allow_html=True)
-
-
-def render_metrics(total: int, passed: int, failed: int) -> None:
-    """Render test result metrics as custom cards."""
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(
-            f"""
-    <div class="bb-metric">
-        <div class="bb-metric-value">{total}</div>
-        <div class="bb-metric-label">Total Tests</div>
-    </div>""",
-            unsafe_allow_html=True,
-        )
-    with col2:
-        st.markdown(
-            f"""
-    <div class="bb-metric">
-        <div class="bb-metric-value bb-pass">{passed}</div>
-        <div class="bb-metric-label">Passed</div>
-    </div>""",
-            unsafe_allow_html=True,
-        )
-    with col3:
-        st.markdown(
-            f"""
-    <div class="bb-metric">
-        <div class="bb-metric-value bb-fail">{failed}</div>
-        <div class="bb-metric-label">Failed</div>
-    </div>""",
-            unsafe_allow_html=True,
-        )
-
-
-def main() -> None:
-    """Run the BreakBot Streamlit UI."""
-    st.set_page_config(page_title="BreakBot", page_icon="BB", layout="wide")
-
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
-    if "username" not in st.session_state:
-        st.session_state.username = ""
-
-    if not st.session_state.logged_in:
-        show_login_page()
-        st.stop()
-
-    apply_theme()
-    init_state()
-
-    with st.sidebar:
-        st.markdown('<div class="bb-logo">BREAK BOT</div>', unsafe_allow_html=True)
-        st.markdown("**AI Red-Team Agent**")
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
-
-        st.markdown(f"Logged in as: **{st.session_state.username}**")
-        if st.button("Logout"):
-            st.session_state.logged_in = False
-            st.session_state.username = ""
+    if st.session_state.get("is_admin", False):
+        if st.button("Admin Panel", key="nav_admin"):
+            st.session_state.nav_page = "Admin Panel"
             st.rerun()
 
-        st.markdown("---")
-        st.markdown("**Navigation**")
-        if st.button("Run Scan", key="nav_scan"):
-            st.session_state.nav_page = "Run Scan"
-            st.rerun()
-        if st.button("My History", key="nav_history"):
-            st.session_state.nav_page = "My History"
-            st.rerun()
-        if st.session_state.get("is_admin", False):
-            if st.button("Admin Panel", key="nav_admin"):
-                st.session_state.nav_page = "Admin Panel"
-                st.rerun()
-        st.markdown("---")
+    st.markdown("---")
 
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
+    if st.session_state.nav_page == "Run Scan":
         st.markdown("**Input Mode**")
-        mode = st.radio(
-            "",
+        mode = st.radio("",
             ["GitHub Repo", "Paste Code"],
             index=1,
-            label_visibility="collapsed",
-        )
+            label_visibility="collapsed")
+    else:
+        mode = "Paste Code"
 
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
-        st.markdown("Powered by Google Gemini", unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("Logout", key="logout_btn"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
-    if "nav_page" not in st.session_state:
-        st.session_state.nav_page = "Run Scan"
+    st.markdown(
+        "<small style='color:#555'>Powered by "
+        "Google Gemini</small>",
+        unsafe_allow_html=True)
 
-    if st.session_state.nav_page == "My History":
-        st.markdown("## My Scan History")
-        try:
-            from database import get_user_history
-
-            history = get_user_history(st.session_state.username)
-            if not history:
-                st.info("No scans yet! Run your first scan.")
-            else:
-                for i, scan in enumerate(history):
-                    with st.expander(
-                        f"Scan {i + 1} | "
-                        f"{str(scan.get('scanned_at', ''))[:16]}"
-                        f" | Bugs: {scan.get('bugs_found', 0)}"
-                    ):
-                        c1, c2 = st.columns(2)
-                        with c1:
-                            st.metric(
-                                "Weak Points",
-                                scan.get("weak_points_found", 0),
-                            )
-                        with c2:
-                            st.metric(
-                                "Bugs Found",
-                                scan.get("bugs_found", 0),
-                            )
-                        if scan.get("report_content"):
-                            st.markdown(scan["report_content"][:500])
-        except Exception as e:
-            st.error(f"Could not load history: {e}")
-        st.stop()
-
-    if st.session_state.nav_page == "Admin Panel":
-        if st.session_state.get("is_admin", False):
-            st.markdown("## Admin Panel")
-            try:
-                from database import get_all_scans, get_all_users, get_stats
-                import pandas as pd
-
-                stats = get_stats()
-                c1, c2, c3 = st.columns(3)
-                with c1:
-                    st.metric("Users", stats["total_users"])
-                with c2:
-                    st.metric("Scans", stats["total_scans"])
-                with c3:
-                    st.metric("Bugs", stats["total_bugs"])
-                st.markdown("---")
-                t1, t2 = st.tabs(["Users", "Scans"])
-                with t1:
-                    users = get_all_users()
-                    if users:
-                        df = pd.DataFrame(users)[
-                            ["username", "email", "is_admin", "created_at"]
-                        ]
-                        st.dataframe(df, use_container_width=True)
-                with t2:
-                    scans = get_all_scans()
-                    if scans:
-                        df = pd.DataFrame(scans)[
-                            [
-                                "username",
-                                "weak_points_found",
-                                "bugs_found",
-                                "scanned_at",
-                            ]
-                        ]
-                        st.dataframe(df, use_container_width=True)
-            except Exception as e:
-                st.error(f"Admin panel error: {e}")
-        st.stop()
-
-    _ = LLMClient
-    ingester = RepoIngester()
-    analyzer = CodeAnalyzer()
-    attacker = AttackGenerator()
-    runner = TestRunner()
-    reporter = BugReporter()
-
-    render_step("Step 1: Input")
+# ─── PAGE: MY HISTORY ─────────────────────────────────────
+if st.session_state.nav_page == "My History":
+    st.markdown(
+        '<div class="step-header">My Scan History</div>',
+        unsafe_allow_html=True)
     try:
-        if mode == "GitHub Repo":
-            repo_url = st.text_input("Repository URL", placeholder="https://github.com/user/repo")
-            if st.button("Ingest Repo", type="primary"):
-                with st.spinner("Ingesting repository..."):
-                    st.session_state.repo_data = ingester.ingest_github(repo_url)
-                    st.session_state["original_code"] = original_code()
-                    st.session_state.analysis = None
-                    st.session_state.test_code = None
-                    st.session_state.test_results = None
-                    st.session_state.report_markdown = None
-                st.success(f"Ingested {st.session_state.repo_data['repo_name']}")
+        from database import get_user_history
+        history = get_user_history(
+            st.session_state.username)
+        if not history:
+            st.info(
+                "No scans yet! "
+                "Go to Run Scan to analyze your first repo.")
         else:
-            raw_code = st.text_area(
-                "Code",
-                height=260,
-                placeholder="def divide(a, b):\n    return a / b",
-            )
-            filename = st.text_input("Filename", value="pasted_code.py")
-            if st.button("Analyze Code", type="primary"):
-                st.session_state.repo_data = ingester.ingest_code(raw_code, filename)
-                st.session_state["original_code"] = raw_code
-                st.session_state.analysis = None
-                st.session_state.test_code = None
-                st.session_state.test_results = None
-                st.session_state.report_markdown = None
-                st.success("Pasted code loaded")
-    except Exception as exc:
-        logger.exception("Input step failed")
-        st.error(str(exc))
+            for i, scan in enumerate(history):
+                with st.expander(
+                    f"Scan {i+1}  |  "
+                    f"{str(scan.get('scanned_at',''))[:16]}"
+                    f"  |  Bugs Found: "
+                    f"{scan.get('bugs_found', 0)}"
+                ):
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        st.metric("Weak Points",
+                            scan.get('weak_points_found', 0))
+                    with c2:
+                        st.metric("Bugs Found",
+                            scan.get('bugs_found', 0))
+                    if scan.get("code_snippet"):
+                        with st.expander("Code Snippet"):
+                            st.code(scan["code_snippet"])
+                    if scan.get("report_content"):
+                        with st.expander("Full Report"):
+                            st.markdown(
+                                scan["report_content"])
+    except Exception as e:
+        st.error(f"Could not load history: {e}")
+    st.stop()
 
-    if st.session_state.repo_data:
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
-        render_step("Step 2: Analysis")
-        if st.session_state.analysis is None:
+# ─── PAGE: ADMIN PANEL ────────────────────────────────────
+if st.session_state.nav_page == "Admin Panel":
+    if not st.session_state.get("is_admin", False):
+        st.error("Access denied")
+        st.stop()
+    st.markdown(
+        '<div class="step-header">Admin Panel</div>',
+        unsafe_allow_html=True)
+    try:
+        from database import get_all_users, get_all_scans, get_stats
+        import pandas as pd
+        stats = get_stats()
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val">
+                    {stats['total_users']}</div>
+                <div class="metric-label">Total Users</div>
+            </div>""", unsafe_allow_html=True)
+        with c2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val">
+                    {stats['total_scans']}</div>
+                <div class="metric-label">Total Scans</div>
+            </div>""", unsafe_allow_html=True)
+        with c3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val">
+                    {stats['total_bugs']}</div>
+                <div class="metric-label">Bugs Found</div>
+            </div>""", unsafe_allow_html=True)
+        st.markdown("---")
+        t1, t2 = st.tabs(["All Users", "All Scans"])
+        with t1:
+            users = get_all_users()
+            if users:
+                df = pd.DataFrame(users)[
+                    ["username","email",
+                     "is_admin","created_at"]]
+                df.columns = ["Username","Email",
+                              "Admin","Joined"]
+                st.dataframe(df, use_container_width=True)
+        with t2:
+            scans = get_all_scans()
+            if scans:
+                df = pd.DataFrame(scans)[
+                    ["username","weak_points_found",
+                     "bugs_found","scanned_at"]]
+                df.columns = ["User","Weak Points",
+                              "Bugs Found","Scanned At"]
+                st.dataframe(df, use_container_width=True)
+    except Exception as e:
+        st.error(f"Admin error: {e}")
+    st.stop()
+
+# ─── PAGE: RUN SCAN ───────────────────────────────────────
+st.markdown(
+    '<div class="step-header">Step 1: Input</div>',
+    unsafe_allow_html=True)
+
+ingested = None
+
+if mode == "GitHub Repo":
+    repo_url = st.text_input("Repository URL",
+        placeholder="https://github.com/user/repo")
+    if st.button("Ingest Repo", key="ingest_btn"):
+        if not repo_url:
+            st.error("Please enter a repo URL")
+        else:
+            with st.spinner("Reading repo..."):
+                try:
+                    ingester = RepoIngester()
+                    ingested = ingester.ingest_github(repo_url)
+                    st.session_state.ingested_files = \
+                        ingested["files"]
+                    st.session_state.original_code = \
+                        "\n".join([
+                            f['content']
+                            for f in ingested["files"]
+                        ])[:500]
+                    st.success(
+                        f"Ingested "
+                        f"{len(ingested['files'])} files!")
+                except Exception as e:
+                    st.error(f"Ingestion error: {e}")
+else:
+    code_input = st.text_area("Paste your code here",
+        height=250,
+        placeholder="def my_function():\n    pass")
+    filename = st.text_input("Filename",
+        value="pasted_code.py")
+    if st.button("Analyze Code", key="analyze_btn"):
+        if not code_input:
+            st.error("Please paste some code")
+        else:
+            ingested = {
+                "repo_name": "pasted_code",
+                "files": [{
+                    "path": filename,
+                    "content": code_input
+                }]
+            }
+            st.session_state.ingested_files = \
+                ingested["files"]
+            st.session_state.original_code = \
+                code_input[:500]
+
+# ─── STEP 2: ANALYSIS ────────────────────────────────────
+if st.session_state.ingested_files:
+    st.markdown(
+        '<div class="step-header">Step 2: Analysis</div>',
+        unsafe_allow_html=True)
+    if not st.session_state.analysis:
+        with st.spinner("Analyzing code..."):
             try:
-                with st.spinner("[*] Reading your code..."):
-                    st.session_state.analysis = analyzer.analyze(st.session_state.repo_data["files"])
-            except Exception as exc:
-                logger.exception("Analysis step failed")
-                st.error(str(exc))
-
-        if st.session_state.analysis:
-            with st.expander("Analysis results", expanded=True):
-                weak_points = (st.session_state.analysis or {}).get("weak_points", [])
-                if weak_points:
-                    render_badges(weak_points)
-                else:
-                    st.info("No weak points were returned.")
-                st.json(st.session_state.analysis)
-
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
-        render_step("Step 3: Attack")
-        if st.button("Launch Attack"):
-            try:
-                with st.spinner("[!] Generating adversarial cases..."):
-                    st.session_state.test_code = attacker.generate_attacks(
-                        st.session_state.analysis or {},
-                        original_code(),
-                    )
-                    st.session_state.test_results = None
-                    st.session_state.report_markdown = None
-            except Exception as exc:
-                logger.exception("Attack step failed")
-                st.error(str(exc))
-
-        if st.session_state.test_code:
-            st.code(st.session_state.test_code, language="python")
-
-        st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
-        render_step("Step 4: Run & Report")
-        if st.button("Run Tests", disabled=not bool(st.session_state.test_code)):
-            try:
-                with st.spinner("Running attacks..."):
-                    st.session_state.test_results = runner.run(st.session_state.test_file_path)
-                    failures = (st.session_state.test_results or {}).get("failures", [])
-                    st.session_state.fixes = reporter.generate_fixes(failures, original_code())
-                    st.session_state.report_markdown = reporter.compile_report(
-                        st.session_state.repo_data["repo_name"],
-                        st.session_state.analysis or {},
-                        st.session_state.test_results or {},
-                        st.session_state.fixes,
-                    )
-                    st.session_state.report_path = str(reporter.last_markdown_path)
-            except Exception as exc:
-                logger.exception("Run/report step failed")
-                st.error(str(exc))
-
-        if st.session_state.test_results:
-            results = st.session_state.test_results or {}
-            render_metrics(
-                results.get("total", 0),
-                results.get("passed", 0),
-                results.get("failed", 0),
-            )
-
-        if st.session_state.report_markdown:
-            st.subheader("Bug Attack Report")
-            report = st.session_state.report_markdown
-            st.markdown(report)
-            # Save scan to history
-            try:
-                from database import save_scan_history
-
-                save_scan_history(
-                    username=st.session_state.get("username", ""),
-                    code_snippet=st.session_state.get("original_code", "")[:500],
-                    weak_points=len(
-                        st.session_state.get("analysis", {}).get("weak_points", [])
-                    ),
-                    bugs=st.session_state.get("test_results", {}).get("failed", 0),
-                    report=report if isinstance(report, str) else str(report),
-                )
+                analyzer = CodeAnalyzer()
+                analysis = analyzer.analyze(
+                    st.session_state.ingested_files)
+                st.session_state.analysis = analysis
             except Exception as e:
-                print(f"Could not save history: {e}")
-            report_path = st.session_state.report_path
-            if report_path and Path(report_path).exists():
-                st.download_button(
-                    "Download Markdown Report",
-                    Path(report_path).read_text(encoding="utf-8"),
-                    file_name=Path(report_path).name,
-                    mime="text/markdown",
-                )
+                st.error(f"Analysis error: {e}")
+    if st.session_state.analysis:
+        with st.expander("Analysis results", expanded=True):
+            weak_points = st.session_state.analysis.get(
+                "weak_points", [])
+            if not weak_points:
+                st.info("No weak points found")
+            else:
+                for wp in weak_points:
+                    st.markdown(
+                        f'<span class="bb-badge">{wp}'
+                        f'</span>',
+                        unsafe_allow_html=True)
 
+# ─── STEP 3: ATTACK ───────────────────────────────────────
+if st.session_state.analysis:
+    st.markdown(
+        '<div class="step-header">Step 3: Attack</div>',
+        unsafe_allow_html=True)
+    if st.button("Launch Attack", key="attack_btn"):
+        with st.spinner("Generating attack cases..."):
+            try:
+                attacker = AttackGenerator()
+                original = "\n".join([
+                    f['content']
+                    for f in st.session_state.ingested_files
+                ])
+                attack_code = attacker.generate_attacks(
+                    st.session_state.analysis, original)
+                st.session_state.attack_code = attack_code
+            except Exception as e:
+                st.error(f"Attack error: {e}")
+    if st.session_state.attack_code:
+        st.code(st.session_state.attack_code,
+                language="python")
 
-if __name__ == "__main__":
-    main()
+# ─── STEP 4: RUN & REPORT ─────────────────────────────────
+if st.session_state.attack_code:
+    st.markdown(
+        '<div class="step-header">'
+        'Step 4: Run & Report</div>',
+        unsafe_allow_html=True)
+    if st.button("Run Tests", key="run_btn"):
+        with st.spinner("Running tests..."):
+            try:
+                runner = TestRunner()
+                results = runner.run("temp/breakbot_tests.py")
+                st.session_state.test_results = results
+            except Exception as e:
+                st.error(f"Runner error: {e}")
+    if st.session_state.test_results:
+        results = st.session_state.test_results
+        total = results.get("total", 0)
+        passed = results.get("passed", 0)
+        failed = results.get("failed", 0)
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val">{total}</div>
+                <div class="metric-label">Total</div>
+            </div>""", unsafe_allow_html=True)
+        with c2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val"
+                     style="color:#00ff88">{passed}</div>
+                <div class="metric-label">Passed</div>
+            </div>""", unsafe_allow_html=True)
+        with c3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-val">{failed}</div>
+                <div class="metric-label">Failed</div>
+            </div>""", unsafe_allow_html=True)
+
+        if not st.session_state.report:
+            with st.spinner("Generating report..."):
+                try:
+                    reporter = BugReporter()
+                    report = reporter.compile_report(
+                        repo_name="pasted_code",
+                        analysis=st.session_state.analysis,
+                        test_results=results,
+                        fixes=[]
+                    )
+                    st.session_state.report = report
+
+                    # SAVE TO HISTORY
+                    try:
+                        save_scan_history(
+                            username=st.session_state.username,
+                            code_snippet=st.session_state.original_code,
+                            weak_points=len(
+                                st.session_state.analysis.get(
+                                    "weak_points", [])),
+                            bugs=failed,
+                            report=report if isinstance(
+                                report, str) else str(report)
+                        )
+                        st.success("Scan saved to history!")
+                    except Exception as e:
+                        print(f"History save error: {e}")
+
+                except Exception as e:
+                    st.error(f"Report error: {e}")
+
+        if st.session_state.report:
+            st.markdown("**Bug Attack Report**")
+            st.markdown(st.session_state.report)
+            st.download_button(
+                label="Download Report",
+                data=st.session_state.report,
+                file_name="breakbot_report.md",
+                mime="text/markdown"
+            )
