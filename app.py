@@ -273,12 +273,45 @@ def main() -> None:
             st.session_state.username = ""
             st.rerun()
 
+        st.markdown("---")
+        st.markdown("**Navigation**")
+
+        if st.session_state.get("is_admin", False):
+            nav_options = ["Run Scan", "My History", "Admin Panel"]
+        else:
+            nav_options = ["Run Scan", "My History"]
+
+        if "nav_page" not in st.session_state:
+            st.session_state.nav_page = "Run Scan"
+
+        for option in nav_options:
+            if st.button(option, key=f"nav_{option}"):
+                st.session_state.nav_page = option
+                st.rerun()
+
+        st.markdown("---")
+
         st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
         st.markdown("**Input Mode**")
         mode = st.radio("", ["GitHub Repo", "Paste Code"], label_visibility="collapsed")
 
         st.markdown('<hr class="bb-divider">', unsafe_allow_html=True)
         st.markdown("Powered by Google Gemini", unsafe_allow_html=True)
+
+    current_page = st.session_state.get("nav_page", "Run Scan")
+
+    if current_page == "My History":
+        from auth import show_user_history
+
+        st.markdown("## My Scan History")
+        show_user_history()
+        st.stop()
+
+    if current_page == "Admin Panel" and st.session_state.get("is_admin", False):
+        from auth import show_admin_panel
+
+        show_admin_panel()
+        st.stop()
 
     _ = LLMClient
     ingester = RepoIngester()
