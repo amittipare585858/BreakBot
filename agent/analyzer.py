@@ -14,26 +14,58 @@ logger = logging.getLogger(__name__)
 
 
 def safe_parse_json(text: str) -> dict:
-    """Safely parse JSON from LLM response, handling all edge cases."""
+    """Safely parse JSON with multiple fallback strategies."""
+    default = {
+        "functions": [],
+        "weak_points": ["Analysis failed - please try again"],
+        "attack_surfaces": [],
+    }
+
+    if not text or len(text.strip()) < 5:
+        return default
+
     try:
-        text = text.strip()
-        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.MULTILINE)
-        text = re.sub(r"```\s*$", "", text, flags=re.MULTILINE)
-        text = text.strip()
         return json.loads(text)
     except Exception:
-        try:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if match:
-                return json.loads(match.group())
-        except Exception:
-            pass
-        logger.warning("JSON parsing failed, returning empty analysis")
-        return {
-            "functions": [],
-            "weak_points": ["Could not parse analysis - try again"],
-            "attack_surfaces": [],
+        pass
+
+    try:
+        match = re.search(r"\{[^{}]*\}", text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+    except Exception:
+        pass
+
+    try:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1:
+            return json.loads(text[start : end + 1])
+    except Exception:
+        pass
+
+    try:
+        functions = re.findall(r'"functions"\s*:\s*\[(.*?)\]', text, re.DOTALL)
+        weak_points = re.findall(r'"weak_points"\s*:\s*\[(.*?)\]', text, re.DOTALL)
+        attack_surfaces = re.findall(r'"attack_surfaces"\s*:\s*\[(.*?)\]', text, re.DOTALL)
+
+        def extract_list(match):
+            if not match:
+                return []
+            items = re.findall(r'"([^"]+)"', match[0])
+            return items
+
+        result = {
+            "functions": extract_list(functions),
+            "weak_points": extract_list(weak_points),
+            "attack_surfaces": extract_list(attack_surfaces),
         }
+        if result["weak_points"]:
+            return result
+    except Exception:
+        pass
+
+    return default
 
 
 class CodeAnalyzer:
