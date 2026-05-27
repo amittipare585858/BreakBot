@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BreakBot
 
 BreakBot is an AI red-team agent that analyzes codebases, generates adversarial pytest cases, runs them in a sandboxed subprocess, and produces structured Bug Attack Reports in Markdown and JSON.
@@ -121,3 +122,6 @@ requirements.txt       # Runtime and dev dependencies
 ## Safety
 
 BreakBot runs generated tests in a subprocess, and it never uses `exec()` or `eval()` to execute generated test code. A subprocess is not a full security sandbox, so run BreakBot in a disposable environment or container when testing unknown repositories.
+=======
+# BreakBot
+>>>>>>> 21d6e42691b35b1db81d4cf60b5687f148d9a0b0

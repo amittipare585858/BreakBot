@@ -51,19 +51,33 @@ class CodeAnalyzer:
 
         if len(combined) > 12000:
             combined = combined[:12000]
-            logger.info("Code truncated to 12000 chars for analysis")
 
         system = (
-            "You are a security and code quality expert. "
-            "Analyze the provided code and respond ONLY with a valid JSON object. "
-            "No explanation, no markdown, no code fences. Just raw JSON."
+            "You are a code security expert. "
+            "You MUST respond with ONLY a raw JSON object. "
+            "No markdown, no code fences, no explanation. "
+            "Start your response with { and end with }. "
+            "Never return empty arrays - always find something."
         )
+
         user = (
-            f"{ANALYZE_PROMPT}\n\nCode to analyze:\n{combined}\n\n"
-            "Respond ONLY with this exact JSON structure:\n"
-            '{"functions": ["func1", "func2"], '
-            '"weak_points": ["description1", "description2"], '
-            '"attack_surfaces": ["surface1", "surface2"]}'
+            "Analyze this code for bugs and security issues.\n\n"
+            f"{combined}\n\n"
+            "Return ONLY this JSON with NO empty arrays:\n"
+            "{\n"
+            '  "functions": ["list every function name found"],\n'
+            '  "weak_points": [\n'
+            '    "ZeroDivisionError possible in divide_numbers()",\n'
+            '    "SQL injection risk in process_user_input()",\n'
+            '    "File handle never closed in read_file()"\n'
+            "  ],\n"
+            '  "attack_surfaces": [\n'
+            '    "division by zero",\n'
+            '    "null input",\n'
+            '    "empty list",\n'
+            '    "SQL injection"\n'
+            "  ]\n"
+            "}"
         )
 
         response = self.llm.chat(
@@ -71,4 +85,22 @@ class CodeAnalyzer:
             user_prompt=user,
             expect_json=True,
         )
-        return safe_parse_json(response)
+
+        result = safe_parse_json(response)
+
+        if not result.get("weak_points"):
+            simple_user = (
+                f"List all bugs in this code as JSON:\n{combined}\n\n"
+                "Respond ONLY with:\n"
+                '{"functions":["name1","name2"],'
+                '"weak_points":["bug description 1","bug description 2"],'
+                '"attack_surfaces":["attack type 1","attack type 2"]}'
+            )
+            response = self.llm.chat(
+                system_prompt="Respond with raw JSON only. No markdown.",
+                user_prompt=simple_user,
+                expect_json=True,
+            )
+            result = safe_parse_json(response)
+
+        return result

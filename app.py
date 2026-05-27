@@ -53,18 +53,18 @@ def severity_badge(item: object) -> str:
         severity = "medium"
         label = str(item)
 
-    icon = "ðŸŸ¡"
+    prefix = "[MED]"
     color = "#facc15"
     if severity == "high":
-        icon = "ðŸ”´"
+        prefix = "[HIGH]"
         color = "#fb7185"
     elif severity == "low":
-        icon = "ðŸŸ¢"
+        prefix = "[LOW]"
         color = "#4ade80"
 
     return (
         f"<span class='badge' style='border-color:{color}; color:{color};'>"
-        f"{icon} {label}</span>"
+        f"{prefix} {label}</span>"
     )
 
 
@@ -107,15 +107,15 @@ def apply_theme() -> None:
 
 def main() -> None:
     """Run the BreakBot Streamlit UI."""
-    st.set_page_config(page_title="BreakBot", page_icon="ðŸ”´", layout="wide")
+    st.set_page_config(page_title="BreakBot", page_icon="BB", layout="wide")
     apply_theme()
     init_state()
 
     with st.sidebar:
-        st.title("ðŸ”´ BreakBot")
+        st.title("BreakBot")
         st.caption("AI Red-Team Agent")
         input_mode = st.radio("Input mode", ["GitHub Repo", "Paste Code"])
-        st.caption("âš¡ Powered by Google Gemini")
+        st.caption("Powered by Google Gemini")
 
     _ = LLMClient
     ingester = RepoIngester()
@@ -155,7 +155,7 @@ def main() -> None:
         st.header("Step 2: Analysis")
         if st.session_state.analysis is None:
             try:
-                with st.spinner("ðŸ§  Reading your code..."):
+                with st.spinner("[*] Reading your code..."):
                     st.session_state.analysis = analyzer.analyze(st.session_state.repo_data["files"])
             except Exception as exc:
                 logger.exception("Analysis step failed")
@@ -173,9 +173,9 @@ def main() -> None:
 
         st.divider()
         st.header("Step 3: Attack")
-        if st.button("âš”ï¸ Launch Attack"):
+        if st.button("Launch Attack"):
             try:
-                with st.spinner("ðŸ’¥ Generating adversarial cases..."):
+                with st.spinner("[!] Generating adversarial cases..."):
                     st.session_state.test_code = attacker.generate_attacks(
                         st.session_state.analysis or {},
                         original_code(),
@@ -191,9 +191,9 @@ def main() -> None:
 
         st.divider()
         st.header("Step 4: Run & Report")
-        if st.button("ðŸ§ª Run Tests", disabled=not bool(st.session_state.test_code)):
+        if st.button("Run Tests", disabled=not bool(st.session_state.test_code)):
             try:
-                with st.spinner("ðŸ§ª Running attacks..."):
+                with st.spinner("Running attacks..."):
                     st.session_state.test_results = runner.run(st.session_state.test_file_path)
                     failures = (st.session_state.test_results or {}).get("failures", [])
                     st.session_state.fixes = reporter.generate_fixes(failures, original_code())
@@ -211,8 +211,8 @@ def main() -> None:
         if st.session_state.test_results:
             col_a, col_b, col_c = st.columns(3)
             col_a.metric("Total", (st.session_state.test_results or {}).get("total", 0))
-            col_b.metric("Passed âœ…", (st.session_state.test_results or {}).get("passed", 0))
-            col_c.metric("Failed âŒ", (st.session_state.test_results or {}).get("failed", 0))
+            col_b.metric("Passed [PASS]", (st.session_state.test_results or {}).get("passed", 0))
+            col_c.metric("Failed [FAIL]", (st.session_state.test_results or {}).get("failed", 0))
 
         if st.session_state.report_markdown:
             st.subheader("Bug Attack Report")
@@ -229,4 +229,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
