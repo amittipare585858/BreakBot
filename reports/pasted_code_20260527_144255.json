@@ -1,0 +1,17 @@
+{
+  "repo_name": "pasted_code",
+  "generated_at": "20260527_144255",
+  "analysis": {
+    "functions": [],
+    "weak_points": [],
+    "attack_surfaces": []
+  },
+  "test_results": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "failures": []
+  },
+  "fixes": [],
+  "markdown_report": "reports\\pasted_code_20260527_144255.md"
+}

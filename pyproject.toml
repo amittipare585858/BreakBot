@@ -1,0 +1,16 @@
+[project]
+name = "breakbot"
+version = "0.1.0"
+description = "AI red-team agent for adversarial code testing and bug attack reports."
+requires-python = ">=3.11"
+dependencies = [
+  "google-generativeai",
+  "pytest",
+  "python-dotenv",
+  "requests",
+  "streamlit",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

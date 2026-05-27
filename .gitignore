@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.streamlit/
+breakbot_runs/
+temp/
+*.pyc
+*.pyo
+*.pyd
+.env
