@@ -65,42 +65,14 @@ def is_valid_email(email: str) -> bool:
 def show_login_page():
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     * { font-family: 'Inter', sans-serif !important; }
-    .stApp { background: #080810 !important; }
-
-    /* Hide header line */
+    .stApp { background: #f5f5ff !important; }
     [data-testid="stDecoration"] { display:none !important; }
     .st-emotion-cache-1dp5vir { display:none !important; }
-    header { background: transparent !important; }
-    #MainMenu { visibility: hidden; }
-    footer { visibility: hidden; }
+    #MainMenu { visibility:hidden; }
+    footer { visibility:hidden; }
 
-    /* Login card */
-    .login-wrap {
-        max-width: 400px;
-        margin: 40px auto;
-    }
-    .login-logo {
-        font-size: 32px;
-        font-weight: 900;
-        letter-spacing: 4px;
-        background: linear-gradient(135deg, #ff3b3b, #ff8080);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-align: center;
-        margin-bottom: 6px;
-    }
-    .login-sub {
-        font-size: 12px;
-        color: #333360;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 32px;
-    }
-
-    /* Buttons */
     .stButton > button {
         background: linear-gradient(
             135deg, #ff3b3b, #cc0000) !important;
@@ -111,43 +83,39 @@ def show_login_page():
         font-size: 14px !important;
         width: 100% !important;
         padding: 12px !important;
-        letter-spacing: 0.3px !important;
+        font-size: 14px !important;
+        box-shadow: 0 4px 12px rgba(255,59,59,0.3) !important;
         transition: all 0.2s !important;
     }
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 20px rgba(255,59,59,0.3) !important;
+        box-shadow: 0 8px 20px rgba(255,59,59,0.4) !important;
     }
-
-    /* Inputs */
     .stTextInput > div > div > input {
-        background: #0e0e20 !important;
-        border: 1px solid #1e1e4a !important;
+        background: #ffffff !important;
+        border: 1px solid #e8e8f0 !important;
         border-radius: 8px !important;
-        color: #e8e8f0 !important;
+        color: #1a1a2e !important;
         padding: 12px !important;
         font-size: 14px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }
     .stTextInput > div > div > input:focus {
         border-color: #ff3b3b60 !important;
-        box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+        box-shadow: 0 0 0 3px rgba(255,59,59,0.1) !important;
     }
-
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        background: #0e0e20 !important;
+        background: #eeeefc !important;
         border-radius: 10px !important;
         padding: 4px !important;
-        gap: 4px !important;
-        border: 1px solid #1e1e4a !important;
+        border: 1px solid #e0e0f0 !important;
     }
     .stTabs [data-baseweb="tab"] {
         background: transparent !important;
-        color: #555580 !important;
+        color: #9999bb !important;
         border-radius: 8px !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 8px 24px !important;
     }
     .stTabs [aria-selected="true"] {
         background: #ff3b3b !important;
@@ -157,25 +125,28 @@ def show_login_page():
     </style>
     """, unsafe_allow_html=True)
 
-    # Centered layout
     _, col, _ = st.columns([1, 1.2, 1])
     with col:
         st.markdown("""
-        <div style='padding: 48px 0 24px;'>
-            <div class='login-logo'>BREAKBOT</div>
-            <div class='login-sub'>
+        <div style='text-align:center;padding:48px 0 28px;'>
+            <div style='font-size:36px;font-weight:900;
+                letter-spacing:4px;color:#ff3b3b;
+                margin-bottom:8px;'>
+                BREAKBOT
+            </div>
+            <div style='font-size:11px;color:#9999bb;
+                text-transform:uppercase;letter-spacing:2px;'>
                 AI Red-Team Security Agent
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Card
         st.markdown("""
-        <div style='background:#0c0c1a;
-            border:1px solid #1e1e3a;
+        <div style='background:#ffffff;
+            border:1px solid #e8e8f0;
             border-radius:16px;
             padding:28px;
-            box-shadow:0 20px 60px rgba(0,0,0,0.5);'>
+            box-shadow:0 8px 32px rgba(0,0,0,0.08);'>
         """, unsafe_allow_html=True)
 
         tab1, tab2 = st.tabs(["Login", "Register"])

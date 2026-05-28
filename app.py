@@ -48,48 +48,29 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* Reset and base */
-* {
-    font-family: 'Inter', sans-serif !important;
-    box-sizing: border-box;
-}
+* { font-family: 'Inter', sans-serif !important; }
+
+/* Main background - WHITE */
 .stApp {
-    background: #080810 !important;
-    color: #e8e8f0 !important;
+    background: #ffffff !important;
+    color: #1a1a2e !important;
 }
 
-/* Remove ALL unwanted lines and borders */
-hr { display: none !important; }
-.stHorizontalBlock { gap: 1rem !important; }
-[data-testid="stDecoration"] {
-    display: none !important;
-}
-.st-emotion-cache-h4xjwg {
-    display: none !important;
-}
-header[data-testid="stHeader"] {
-    background: transparent !important;
-    border: none !important;
-}
-/* Remove green/colored lines */
-.stApp > header {
-    background: transparent !important;
-}
-[data-testid="stHeader"]::before,
-[data-testid="stHeader"]::after {
-    display: none !important;
-}
-.st-emotion-cache-1dp5vir {
-    display: none !important;
-}
-div[data-testid="stDecoration"] {
-    display: none !important;
-}
+/* Hide unwanted elements */
+[data-testid="stSidebarNav"] { display:none !important; }
+[data-testid="stSidebarNavItems"] { display:none !important; }
+ul[data-testid="stSidebarNavItems"] { display:none !important; }
+[data-testid="stSidebarNavSeparator"] { display:none !important; }
+[data-testid="stDecoration"] { display:none !important; }
+.st-emotion-cache-1dp5vir { display:none !important; }
+#MainMenu { visibility:hidden; }
+footer { visibility:hidden; }
+[data-testid="stToolbar"] { display:none; }
 
-/* Sidebar */
+/* Sidebar - Light gray */
 [data-testid="stSidebar"] {
-    background: #0c0c18 !important;
-    border-right: 1px solid #1a1a3a !important;
-    padding: 0 !important;
+    background: #f8f8fc !important;
+    border-right: 1px solid #e8e8f0 !important;
 }
 [data-testid="stSidebar"] > div {
     padding: 24px 16px !important;
@@ -98,45 +79,54 @@ div[data-testid="stDecoration"] {
 /* Sidebar logo */
 .bb-logo {
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 3px;
-    background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ff3b3b;
     margin-bottom: 4px;
 }
 .bb-tagline {
-    font-size: 11px;
-    color: #555580;
-    letter-spacing: 1px;
+    font-size: 10px;
+    color: #9999bb;
+    letter-spacing: 2px;
     text-transform: uppercase;
     margin-bottom: 20px;
 }
 
-/* User info in sidebar */
+/* User card */
 .bb-user-card {
-    background: #12122a;
-    border: 1px solid #1e1e4a;
+    background: #ffffff;
+    border: 1px solid #e8e8f0;
     border-radius: 10px;
     padding: 12px;
     margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .bb-username {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
-    color: #ffffff;
+    color: #1a1a2e;
 }
 .bb-email {
     font-size: 11px;
-    color: #555580;
+    color: #9999bb;
     margin-top: 2px;
+}
+
+/* Nav section label */
+.bb-nav-label {
+    font-size: 10px;
+    color: #9999bb;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 /* Navigation buttons */
 .stButton > button {
-    background: transparent !important;
-    color: #a0a0c0 !important;
-    border: 1px solid #1e1e4a !important;
+    background: #ffffff !important;
+    color: #555580 !important;
+    border: 1px solid #e8e8f0 !important;
     border-radius: 8px !important;
     font-weight: 500 !important;
     font-size: 13px !important;
@@ -145,53 +135,62 @@ div[data-testid="stDecoration"] {
     text-align: left !important;
     transition: all 0.2s ease !important;
     margin-bottom: 4px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
 }
 .stButton > button:hover {
-    background: #ff3b3b15 !important;
-    border-color: #ff3b3b50 !important;
-    color: #ff6b6b !important;
-    transform: translateX(4px) !important;
+    background: #fff0f0 !important;
+    border-color: #ff3b3b60 !important;
+    color: #ff3b3b !important;
+    transform: translateX(3px) !important;
 }
 
-/* Primary action buttons */
-.primary-btn > button {
-    background: linear-gradient(135deg, #ff3b3b, #cc0000) !important;
+/* Active nav item */
+.bb-nav-active {
+    background: #fff0f0;
+    border: 1px solid #ff3b3b60;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #ff3b3b;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Primary buttons */
+div[data-testid="stButton"] button[kind="primary"],
+.primary-action button {
+    background: linear-gradient(
+        135deg, #ff3b3b, #cc0000) !important;
     color: white !important;
     border: none !important;
-    border-radius: 8px !important;
     font-weight: 600 !important;
-    font-size: 14px !important;
-    padding: 10px 24px !important;
-    letter-spacing: 0.3px !important;
-}
-.primary-btn > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 20px rgba(255,59,59,0.3) !important;
+    box-shadow: 0 4px 12px rgba(255,59,59,0.3) !important;
 }
 .step-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #120808, #1a0a0a);
+    background: linear-gradient(135deg, #fff5f5, #fff0f0);
     border-left: 3px solid #ff3b3b;
     border-radius: 0 10px 10px 0;
     margin: 24px 0 16px 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #ffffff;
+    color: #1a1a2e;
+    box-shadow: 0 2px 8px rgba(255,59,59,0.08);
 }
 .step-num {
     background: #ff3b3b;
     color: white;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     flex-shrink: 0;
 }
@@ -199,17 +198,17 @@ div[data-testid="stDecoration"] {
 /* Input fields */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea {
-    background: #0e0e20 !important;
-    border: 1px solid #1e1e4a !important;
+    background: #ffffff !important;
+    border: 1px solid #e8e8f0 !important;
     border-radius: 8px !important;
-    color: #e8e8f0 !important;
-    font-family: 'Inter', sans-serif !important;
+    color: #1a1a2e !important;
     font-size: 14px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
 }
 .stTextInput > div > div > input:focus,
 .stTextArea > div > div > textarea:focus {
     border-color: #ff3b3b80 !important;
-    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+    box-shadow: 0 0 0 3px rgba(255,59,59,0.1) !important;
 }
 
 /* Code blocks */
@@ -218,20 +217,25 @@ div[data-testid="stDecoration"] {
     border: 1px solid #1e1e4a !important;
 }
 
+/* Cards */
+.bb-card {
+    background: #ffffff;
+    border: 1px solid #e8e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 8px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
 /* Metric cards */
 .bb-metric,
 .metric-card {
-    background: #0e0e20;
-    border: 1px solid #1e1e4a;
+    background: #ffffff;
+    border: 1px solid #e8e8f0;
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    transition: all 0.2s ease;
-}
-.bb-metric:hover,
-.metric-card:hover {
-    border-color: #ff3b3b40;
-    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .bb-metric-val,
 .metric-val {
@@ -239,12 +243,11 @@ div[data-testid="stDecoration"] {
     font-weight: 800;
     line-height: 1;
     margin-bottom: 6px;
-    color: #ff3b3b;
 }
 .bb-metric-label,
 .metric-label {
     font-size: 11px;
-    color: #555580;
+    color: #9999bb;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 500;
@@ -252,9 +255,10 @@ div[data-testid="stDecoration"] {
 
 /* Score card */
 .bb-score-card {
-    background: linear-gradient(135deg, #0e0e20, #120820);
+    background: linear-gradient(135deg, #fff5f5, #fff0f0);
+    border: 1px solid #ffdddd;
     border-radius: 16px;
-    padding: 28px;
+    padding: 24px;
     text-align: center;
     margin: 16px 0;
 }
@@ -263,51 +267,141 @@ div[data-testid="stDecoration"] {
 .bb-badge {
     display: inline-block;
     border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    font-weight: 500;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
     margin: 3px;
     font-family: 'Inter', sans-serif;
 }
 
-/* Report card */
-.bb-report-card {
-    background: #0e0e20;
-    border: 1px solid #1e1e4a;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 8px 0;
-}
-.bb-report-title {
-    font-size: 13px;
+/* Report section */
+.bb-report-header {
+    background: linear-gradient(135deg, #ff3b3b, #cc0000);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    font-size: 16px;
     font-weight: 700;
-    color: #ff6b6b;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 .bb-report-body {
+    background: #ffffff;
+    border: 1px solid #e8e8f0;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 20px 24px;
+}
+.bb-report-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f8;
+}
+.bb-report-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9999bb;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+/* Bug item */
+.bb-bug-item {
+    background: #fff5f5;
+    border: 1px solid #ffdddd;
+    border-left: 3px solid #ff3b3b;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 6px 0;
+}
+.bb-bug-name {
     font-size: 13px;
-    color: #a0a0c0;
-    line-height: 1.6;
+    font-weight: 600;
+    color: #cc0000;
+}
+.bb-bug-error {
+    font-size: 12px;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 4px;
+}
+
+/* Function tags */
+.bb-fn-tag {
+    display: inline-block;
+    background: #f5f5ff;
+    border: 1px solid #e0e0f0;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: #555580;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 3px;
+}
+
+/* Weakness item */
+.bb-weak-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f5ff;
 }
 
 /* Section divider */
 .bb-divider {
     border: none;
-    border-top: 1px solid #1a1a3a;
-    margin: 20px 0;
+    border-top: 1px solid #f0f0f8;
+    margin: 16px 0;
 }
 
 /* Radio buttons */
 .stRadio label {
-    color: #a0a0c0 !important;
+    color: #555580 !important;
     font-size: 13px !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    background: #f5f5ff !important;
+    border-radius: 10px !important;
+    padding: 4px !important;
+    border: 1px solid #e8e8f0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    color: #9999bb !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+.stTabs [aria-selected="true"] {
+    background: #ff3b3b !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Dataframe */
+.stDataFrame {
+    border: 1px solid #e8e8f0 !important;
+    border-radius: 8px !important;
+}
+
+/* Success/error messages */
+.stSuccess {
+    background: #f0fff8 !important;
+    border: 1px solid #00cc88 !important;
+    color: #006644 !important;
+}
+.stError {
+    background: #fff5f5 !important;
+    border: 1px solid #ffaaaa !important;
+    color: #cc0000 !important;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #080810; }
+::-webkit-scrollbar-track { background: #f8f8fc; }
 ::-webkit-scrollbar-thumb {
     background: #ff3b3b40;
     border-radius: 2px;
@@ -326,14 +420,12 @@ footer { visibility: hidden; }
 
 # ─── SIDEBAR ──────────────────────────────────────────────
 with st.sidebar:
-    # Logo
     st.markdown("""
     <div class="bb-logo">BREAKBOT</div>
     <div class="bb-tagline">AI Red-Team Agent</div>
-    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:12px 0;"></div>
+    <div class="bb-divider"></div>
     """, unsafe_allow_html=True)
 
-    # User card
     st.markdown(f"""
     <div class="bb-user-card">
         <div class="bb-username">
@@ -343,15 +435,7 @@ with st.sidebar:
             {st.session_state.user_email}
         </div>
     </div>
-    """, unsafe_allow_html=True)
-
-    # Navigation
-    st.markdown("""
-    <div style='font-size:10px; color:#333360;
-        text-transform:uppercase; letter-spacing:2px;
-        font-weight:600; margin-bottom:8px;'>
-        Navigation
-    </div>
+    <div class="bb-nav-label">Navigation</div>
     """, unsafe_allow_html=True)
 
     nav_items = ["Run Scan", "My History", "Dashboard"]
@@ -359,39 +443,22 @@ with st.sidebar:
         nav_items.append("Admin Panel")
 
     for item in nav_items:
-        active = st.session_state.nav_page == item
-        if active:
+        if st.session_state.nav_page == item:
             st.markdown(f"""
-            <div style='background:#ff3b3b15;
-                border:1px solid #ff3b3b40;
-                border-radius:8px;
-                padding:8px 16px;
-                color:#ff6b6b;
-                font-size:13px;
-                font-weight:600;
-                margin-bottom:4px;
-                cursor:pointer;'>
-                {item}
-            </div>
+            <div class="bb-nav-active">{item}</div>
             """, unsafe_allow_html=True)
         else:
             if st.button(item, key=f"nav_{item}"):
                 st.session_state.nav_page = item
                 st.rerun()
 
-    st.markdown("""
-    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:16px 0;"></div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="bb-divider"></div>',
+                unsafe_allow_html=True)
 
-    # Input mode (only on Run Scan)
     if st.session_state.nav_page == "Run Scan":
-        st.markdown("""
-        <div style='font-size:10px; color:#333360;
-            text-transform:uppercase; letter-spacing:2px;
-            font-weight:600; margin-bottom:8px;'>
-            Input Mode
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="bb-nav-label">Input Mode</div>',
+            unsafe_allow_html=True)
         mode = st.radio("",
             ["GitHub Repo", "Paste Code"],
             index=1,
@@ -399,9 +466,8 @@ with st.sidebar:
     else:
         mode = "Paste Code"
 
-    st.markdown("""
-    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:16px 0;"></div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="bb-divider"></div>',
+                unsafe_allow_html=True)
 
     if st.button("Logout", key="logout_btn"):
         for key in list(st.session_state.keys()):
@@ -409,10 +475,9 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("""
-    <div style='position:absolute; bottom:20px; left:16px;
-        right:16px; font-size:10px; color:#2a2a50;
-        text-align:center; text-transform:uppercase;
-        letter-spacing:1px;'>
+    <div style='font-size:10px;color:#ccccdd;
+        text-align:center;margin-top:20px;
+        text-transform:uppercase;letter-spacing:1px;'>
         Powered by Google Gemini
     </div>
     """, unsafe_allow_html=True)
@@ -531,10 +596,8 @@ if st.session_state.nav_page == "Dashboard":
 # ─── PAGE: RUN SCAN ───────────────────────────────────────
 st.markdown("""
 <div class="step-header">
-    <div class="step-num">1</div>
-    Input
-</div>
-""", unsafe_allow_html=True)
+    <div class="step-num">1</div>Input
+</div>""", unsafe_allow_html=True)
 
 ingested = None
 
@@ -597,10 +660,8 @@ else:
 if st.session_state.ingested_files:
     st.markdown("""
     <div class="step-header">
-        <div class="step-num">2</div>
-        Analysis
-    </div>
-    """, unsafe_allow_html=True)
+        <div class="step-num">2</div>Analysis
+    </div>""", unsafe_allow_html=True)
     if not st.session_state.analysis:
         with st.spinner("Analyzing code..."):
             try:
@@ -643,10 +704,8 @@ if st.session_state.ingested_files:
 if st.session_state.analysis:
     st.markdown("""
     <div class="step-header">
-        <div class="step-num">3</div>
-        Attack
-    </div>
-    """, unsafe_allow_html=True)
+        <div class="step-num">3</div>Attack
+    </div>""", unsafe_allow_html=True)
     if st.button("Launch Attack", key="attack_btn"):
         with st.spinner("Generating attack cases..."):
             try:
@@ -668,10 +727,8 @@ if st.session_state.analysis:
 if st.session_state.attack_code:
     st.markdown("""
     <div class="step-header">
-        <div class="step-num">4</div>
-        Run & Report
-    </div>
-    """, unsafe_allow_html=True)
+        <div class="step-num">4</div>Run & Report
+    </div>""", unsafe_allow_html=True)
     if st.button("Run Tests", key="run_btn"):
         with st.spinner("Running tests..."):
             try:
@@ -690,14 +747,14 @@ if st.session_state.attack_code:
             st.markdown(f"""
             <div class="bb-metric">
                 <div class="bb-metric-val"
-                     style="color:#e8e8f0">{total}</div>
+                     style="color:#1a1a2e">{total}</div>
                 <div class="bb-metric-label">Total Tests</div>
             </div>""", unsafe_allow_html=True)
         with c2:
             st.markdown(f"""
             <div class="bb-metric">
                 <div class="bb-metric-val"
-                     style="color:#00d97e">{passed}</div>
+                     style="color:#00aa66">{passed}</div>
                 <div class="bb-metric-label">Passed</div>
             </div>""", unsafe_allow_html=True)
         with c3:
@@ -796,70 +853,51 @@ if st.session_state.attack_code:
             else:
                 fixes = st.session_state.get("fixes", [])
 
-            # Parse and display report beautifully
             st.markdown("""
-            <div style='background:#0e0e20;
-                border:1px solid #1e1e4a;
-                border-radius:16px; padding:28px;
-                margin:16px 0;'>
-                <div style='font-size:20px; font-weight:800;
-                    color:#ff3b3b; margin-bottom:4px;
-                    letter-spacing:1px;'>
-                    BUG ATTACK REPORT
-                </div>
-                <div style='font-size:12px; color:#333360;
-                    margin-bottom:20px;'>
-                    Generated by BreakBot AI Red-Team Agent
-                </div>
+            <div class="bb-report-header">
+                BUG ATTACK REPORT
+            </div>
+            <div class="bb-report-body">
             """, unsafe_allow_html=True)
 
             functions = st.session_state.analysis.get(
                 "functions", [])
             if functions:
-                st.markdown(f"""
-                <div class="bb-report-card">
-                    <div class="bb-report-title">
-                        Functions Analyzed ({len(functions)})
+                st.markdown("""
+                <div class="bb-report-section">
+                    <div class="bb-report-section-title">
+                        Functions Analyzed
                     </div>
-                    <div style='display:flex; flex-wrap:wrap; gap:6px;'>
-                        {"".join([
-                            f'<span style="background:#12122a;'
-                            f'border:1px solid #1e1e4a;'
-                            f'border-radius:6px;padding:3px 10px;'
-                            f'font-size:12px;color:#a0a0c0;'
-                            f'font-family:JetBrains Mono,monospace;">'
-                            f'{fn}</span>'
-                            for fn in functions
-                        ])}
-                    </div>
-                </div>
                 """, unsafe_allow_html=True)
+                tags = "".join([
+                    f'<span class="bb-fn-tag">{fn}</span>'
+                    for fn in functions])
+                st.markdown(tags, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
 
             weak_points = st.session_state.analysis.get(
                 "weak_points", [])
             if weak_points:
                 st.markdown("""
-                <div class="bb-report-card">
-                    <div class="bb-report-title">
+                <div class="bb-report-section">
+                    <div class="bb-report-section-title">
                         Vulnerabilities Found
                     </div>
                 """, unsafe_allow_html=True)
                 for wp in weak_points:
-                    severity = get_severity(wp)
-                    color = get_severity_color(severity)
+                    sev = get_severity(wp)
+                    col = get_severity_color(sev)
                     st.markdown(f"""
-                    <div style='display:flex; align-items:center;
-                        gap:10px; padding:8px 0;
-                        border-bottom:1px solid #12122a;'>
-                        <span style='background:{color}22;
-                            border:1px solid {color}60;
-                            color:{color};border-radius:4px;
+                    <div class="bb-weak-item">
+                        <span style="background:{col}20;
+                            border:1px solid {col}60;
+                            color:{col};border-radius:4px;
                             padding:2px 8px;font-size:10px;
-                            font-weight:700;letter-spacing:1px;
-                            min-width:70px;text-align:center;'>
-                            {severity}
+                            font-weight:700;min-width:65px;
+                            text-align:center;display:inline-block;">
+                            {sev}
                         </span>
-                        <span style='color:#c0c0d0;font-size:13px;'>
+                        <span style="color:#444466;font-size:13px;">
                             {wp}
                         </span>
                     </div>
@@ -870,24 +908,19 @@ if st.session_state.attack_code:
                 "failures", [])
             if failures:
                 st.markdown("""
-                <div class="bb-report-card"
-                     style="border-color:#ff3b3b30;">
-                    <div class="bb-report-title"
-                         style="color:#ff3b3b;">
-                        Bugs Confirmed by Testing
+                <div class="bb-report-section">
+                    <div class="bb-report-section-title">
+                        Confirmed Bugs
                     </div>
                 """, unsafe_allow_html=True)
                 for i, f in enumerate(failures, 1):
                     st.markdown(f"""
-                    <div style='padding:10px 0;
-                        border-bottom:1px solid #12122a;'>
-                        <div style='font-size:13px;font-weight:600;
-                            color:#ff6b6b;margin-bottom:4px;'>
+                    <div class="bb-bug-item">
+                        <div class="bb-bug-name">
                             Bug #{i}: {f.get('test_name','')}
                         </div>
-                        <div style='font-size:12px;color:#666690;
-                            font-family:JetBrains Mono,monospace;'>
-                            {f.get('error','')[:200]}
+                        <div class="bb-bug-error">
+                            {f.get('error','')[:150]}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -905,18 +938,19 @@ if st.session_state.attack_code:
                 st.markdown("### Fix Suggestions")
                 for i, fix in enumerate(fixes, 1):
                     st.markdown(f"""
-                    <div style='background:#16213e;
-                        border:1px solid #ff3b3b30;
+                    <div style='background:#ffffff;
+                        border:1px solid #e8e8f0;
                         border-radius:10px;
-                        padding:16px; margin:8px 0;'>
+                        padding:16px; margin:8px 0;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.05);'>
                         <div style='color:#ff3b3b; font-weight:700;
                             margin-bottom:8px;'>
                             Fix #{i}: {fix.get('weak_point','')[:60]}
                         </div>
-                        <div style='color:#a0a0b0; font-size:13px;'>
+                        <div style='color:#555580; font-size:13px;'>
                             Issue: {fix.get('issue','')}
                         </div>
-                        <div style='color:#a0a0b0; font-size:13px;
+                        <div style='color:#555580; font-size:13px;
                             margin-top:6px;'>
                             Why: {fix.get('explanation','')}
                         </div>
