@@ -113,6 +113,12 @@ st.markdown("""
     background: #ff3b3b50;
     border-radius: 3px;
 }
+.streamlit-expanderHeader svg {
+    display: none !important;
+}
+[data-testid="stExpander"] summary::before {
+    content: "" !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -197,9 +203,9 @@ if st.session_state.nav_page == "My History":
         else:
             for i, scan in enumerate(history):
                 with st.expander(
-                    f"Scan {i+1}  |  "
+                    f"Scan {i + 1} | "
                     f"{str(scan.get('scanned_at',''))[:16]}"
-                    f"  |  Bugs Found: "
+                    f" | Bugs Found: "
                     f"{scan.get('bugs_found', 0)}"
                 ):
                     c1, c2 = st.columns(2)
@@ -362,7 +368,7 @@ if st.session_state.ingested_files:
             except Exception as e:
                 st.error(f"Analysis error: {e}")
     if st.session_state.analysis:
-        with st.expander("Analysis results", expanded=True):
+        with st.expander("Analysis Results", expanded=True):
             weak_points = st.session_state.analysis.get(
                 "weak_points", [])
             if not weak_points:
@@ -547,7 +553,7 @@ if st.session_state.attack_code:
                 st.markdown("### Fix Suggestions")
                 for i, fix in enumerate(fixes, 1):
                     with st.expander(
-                        f"Fix #{i}: "
+                        f"Fix {i}: "
                         f"{fix.get('weak_point','')[:60]}"
                     ):
                         st.markdown(f"**Issue:** "
