@@ -62,72 +62,121 @@ def is_valid_email(email: str) -> bool:
     return bool(re.match(pattern, email))
 
 
-def show_login_page() -> None:
-    """Display the login/register page."""
-    st.markdown(
-        """
+def show_login_page():
+    st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-    * { font-family: 'Space Grotesk', sans-serif; }
-    .stApp { background: #0a0a0f; color: #ffffff; }
-    .login-container {
-        max-width: 420px;
-        margin: 60px auto;
-        padding: 40px;
-        background: #16213e;
-        border: 1px solid #ff3b3b30;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(255,59,59,0.1);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    * { font-family: 'Inter', sans-serif !important; }
+    .stApp { background: #080810 !important; }
+
+    /* Hide header line */
+    [data-testid="stDecoration"] { display:none !important; }
+    .st-emotion-cache-1dp5vir { display:none !important; }
+    header { background: transparent !important; }
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+
+    /* Login card */
+    .login-wrap {
+        max-width: 400px;
+        margin: 40px auto;
     }
     .login-logo {
-        font-size: 36px;
-        font-weight: 800;
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 4px;
         background: linear-gradient(135deg, #ff3b3b, #ff8080);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .login-sub {
+        font-size: 12px;
+        color: #333360;
         text-align: center;
-        color: #a0a0b0;
-        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
         margin-bottom: 32px;
     }
+
+    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #ff3b3b, #cc0000) !important;
+        background: linear-gradient(
+            135deg, #ff3b3b, #cc0000) !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
+        font-size: 14px !important;
         width: 100% !important;
         padding: 12px !important;
+        letter-spacing: 0.3px !important;
+        transition: all 0.2s !important;
     }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(255,59,59,0.3) !important;
+    }
+
+    /* Inputs */
     .stTextInput > div > div > input {
-        background: #0a0a0f !important;
-        border: 1px solid #ff3b3b30 !important;
+        background: #0e0e20 !important;
+        border: 1px solid #1e1e4a !important;
         border-radius: 8px !important;
-        color: #ffffff !important;
+        color: #e8e8f0 !important;
+        padding: 12px !important;
+        font-size: 14px !important;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: #ff3b3b60 !important;
+        box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background: #0e0e20 !important;
+        border-radius: 10px !important;
+        padding: 4px !important;
+        gap: 4px !important;
+        border: 1px solid #1e1e4a !important;
     }
     .stTabs [data-baseweb="tab"] {
-        color: #a0a0b0;
+        background: transparent !important;
+        color: #555580 !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 8px 24px !important;
     }
     .stTabs [aria-selected="true"] {
-        color: #ff3b3b;
-        border-bottom: 2px solid #ff3b3b;
+        background: #ff3b3b !important;
+        color: white !important;
+        font-weight: 600 !important;
     }
     </style>
-    """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown('<div class="login-logo">BREAKBOT</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="login-sub">AI Red-Team Security Agent</div>',
-            unsafe_allow_html=True,
-        )
+    # Centered layout
+    _, col, _ = st.columns([1, 1.2, 1])
+    with col:
+        st.markdown("""
+        <div style='padding: 48px 0 24px;'>
+            <div class='login-logo'>BREAKBOT</div>
+            <div class='login-sub'>
+                AI Red-Team Security Agent
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Card
+        st.markdown("""
+        <div style='background:#0c0c1a;
+            border:1px solid #1e1e3a;
+            border-radius:16px;
+            padding:28px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.5);'>
+        """, unsafe_allow_html=True)
 
         tab1, tab2 = st.tabs(["Login", "Register"])
 
@@ -135,15 +184,13 @@ def show_login_page() -> None:
             username = st.text_input(
                 "Username",
                 key="login_user",
-                placeholder="Enter username",
-            )
+                placeholder="Enter your username")
             password = st.text_input(
                 "Password",
                 type="password",
                 key="login_pass",
-                placeholder="Enter password",
-            )
-
+                placeholder="Enter your password")
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Login", key="login_btn"):
                 if not username or not password:
                     st.error("Please fill in all fields")
@@ -152,8 +199,7 @@ def show_login_page() -> None:
                         from database import verify_user
                         user = verify_user(
                             username.strip(),
-                            password.strip()
-                        )
+                            password.strip())
                         if user:
                             st.session_state.logged_in = True
                             st.session_state.username = \
@@ -165,66 +211,60 @@ def show_login_page() -> None:
                             st.rerun()
                         else:
                             st.error(
-                                "Invalid username or password. "
-                                "Please try again.")
+                                "Invalid username or password")
                     except Exception as e:
                         st.error(f"Login error: {e}")
 
-            st.markdown("---")
-            st.markdown(
-                "Demo account: username `demo` password `demo123`",
-                unsafe_allow_html=True,
-            )
+            st.markdown("""
+            <div style='margin-top:16px;padding-top:16px;
+                border-top:1px solid #1a1a3a;
+                font-size:12px;color:#333360;'>
+                Demo: <code style='color:#ff6b6b'>demo</code>
+                / <code style='color:#ff6b6b'>demo123</code>
+            </div>
+            """, unsafe_allow_html=True)
 
         with tab2:
-            from database import register_user as register_database_user
-
             new_user = st.text_input(
-                "Choose Username",
+                "Username",
                 key="reg_user",
-                placeholder="Enter username",
-            )
+                placeholder="Choose a username")
             new_email = st.text_input(
                 "Email Address",
                 key="reg_email",
-                placeholder="name@example.com",
-            )
+                placeholder="name@gmail.com or name@yahoo.com")
             new_pass = st.text_input(
-                "Choose Password",
+                "Password",
                 type="password",
                 key="reg_pass",
-                placeholder="Min 6 characters",
-            )
-            confirm_pass = st.text_input(
+                placeholder="Minimum 6 characters")
+            confirm = st.text_input(
                 "Confirm Password",
                 type="password",
                 key="reg_confirm",
-                placeholder="Repeat password",
-            )
-
+                placeholder="Repeat your password")
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Create Account", key="reg_btn"):
-                if not all([new_user, new_email, new_pass, confirm_pass]):
+                if not all([new_user, new_email,
+                            new_pass, confirm]):
                     st.error("Please fill in all fields")
                 elif not is_valid_email(new_email):
-                    st.error(
-                        "Invalid email format. "
-                        "Example: name@gmail.com or "
-                        "name@yahoo.com")
+                    st.error("Please enter a valid email")
                 elif len(new_pass) < 6:
-                    st.error(
-                        "Password must be at least "
-                        "6 characters")
-                elif new_pass != confirm_pass:
+                    st.error("Password min 6 characters")
+                elif new_pass != confirm:
                     st.error("Passwords do not match")
                 else:
-                    result = register_database_user(
+                    from database import register_user
+                    result = register_user(
                         new_user, new_email, new_pass)
                     if result["success"]:
                         st.success(
-                            "Account created! "
-                            "Please login.")
+                            "Account created! Please login.")
                     else:
                         st.error(result["error"])
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def show_user_history():

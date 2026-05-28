@@ -45,89 +45,280 @@ if not st.session_state.logged_in:
 # ─── GLOBAL CSS ───────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap');
-* { font-family: 'Space Grotesk', sans-serif !important; }
-.stApp { background: #0a0a0f; color: #ffffff; }
-[data-testid="stSidebar"] {
-    background: #0d0d1a;
-    border-right: 1px solid #ff3b3b30;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Reset and base */
+* {
+    font-family: 'Inter', sans-serif !important;
+    box-sizing: border-box;
 }
-.stButton > button {
-    background: linear-gradient(135deg, #ff3b3b, #cc0000) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    padding: 10px 20px !important;
+.stApp {
+    background: #080810 !important;
+    color: #e8e8f0 !important;
 }
-.stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 25px rgba(255,59,59,0.4) !important;
-}
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea {
-    background: #1a1a2e !important;
-    border: 1px solid #ff3b3b30 !important;
-    border-radius: 8px !important;
-    color: #ffffff !important;
-}
-.step-header {
-    background: linear-gradient(135deg, #1a0a0a, #2a0a0a);
-    border-left: 4px solid #ff3b3b;
-    border-radius: 0 8px 8px 0;
-    padding: 16px 20px;
-    margin: 20px 0 16px 0;
-    font-size: 20px;
-    font-weight: 700;
-}
-.metric-card {
-    background: #16213e;
-    border: 1px solid #ff3b3b20;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-}
-.metric-val {
-    font-size: 42px;
-    font-weight: 700;
-    color: #ff3b3b;
-}
-.metric-label {
-    font-size: 12px;
-    color: #a0a0b0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.bb-badge {
-    display: inline-block;
-    background: #ff3b3b20;
-    border: 1px solid #ff3b3b50;
-    color: #ff6b6b;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 12px;
-    margin: 4px 2px;
-}
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb {
-    background: #ff3b3b50;
-    border-radius: 3px;
-}
-/* Hide broken sidebar collapse icon */
-[data-testid="collapsedControl"] {
-    display: none !important;
-}
-button[kind="headerNoPadding"] {
-    display: none !important;
-}
-[data-testid="stSidebarCollapseButton"] {
+
+/* Remove ALL unwanted lines and borders */
+hr { display: none !important; }
+.stHorizontalBlock { gap: 1rem !important; }
+[data-testid="stDecoration"] {
     display: none !important;
 }
 .st-emotion-cache-h4xjwg {
     display: none !important;
 }
-/* Hide any text rendering as icon names */
-[data-testid="stSidebarNav"] {
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    border: none !important;
+}
+/* Remove green/colored lines */
+.stApp > header {
+    background: transparent !important;
+}
+[data-testid="stHeader"]::before,
+[data-testid="stHeader"]::after {
+    display: none !important;
+}
+.st-emotion-cache-1dp5vir {
+    display: none !important;
+}
+div[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: #0c0c18 !important;
+    border-right: 1px solid #1a1a3a !important;
+    padding: 0 !important;
+}
+[data-testid="stSidebar"] > div {
+    padding: 24px 16px !important;
+}
+
+/* Sidebar logo */
+.bb-logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+.bb-tagline {
+    font-size: 11px;
+    color: #555580;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+/* User info in sidebar */
+.bb-user-card {
+    background: #12122a;
+    border: 1px solid #1e1e4a;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+.bb-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
+}
+.bb-email {
+    font-size: 11px;
+    color: #555580;
+    margin-top: 2px;
+}
+
+/* Navigation buttons */
+.stButton > button {
+    background: transparent !important;
+    color: #a0a0c0 !important;
+    border: 1px solid #1e1e4a !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    width: 100% !important;
+    text-align: left !important;
+    transition: all 0.2s ease !important;
+    margin-bottom: 4px !important;
+}
+.stButton > button:hover {
+    background: #ff3b3b15 !important;
+    border-color: #ff3b3b50 !important;
+    color: #ff6b6b !important;
+    transform: translateX(4px) !important;
+}
+
+/* Primary action buttons */
+.primary-btn > button {
+    background: linear-gradient(135deg, #ff3b3b, #cc0000) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 10px 24px !important;
+    letter-spacing: 0.3px !important;
+}
+.primary-btn > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(255,59,59,0.3) !important;
+}
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #120808, #1a0a0a);
+    border-left: 3px solid #ff3b3b;
+    border-radius: 0 10px 10px 0;
+    margin: 24px 0 16px 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+.step-num {
+    background: #ff3b3b;
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+/* Input fields */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: #0e0e20 !important;
+    border: 1px solid #1e1e4a !important;
+    border-radius: 8px !important;
+    color: #e8e8f0 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #ff3b3b80 !important;
+    box-shadow: 0 0 0 2px rgba(255,59,59,0.1) !important;
+}
+
+/* Code blocks */
+.stCodeBlock {
+    border-radius: 10px !important;
+    border: 1px solid #1e1e4a !important;
+}
+
+/* Metric cards */
+.bb-metric,
+.metric-card {
+    background: #0e0e20;
+    border: 1px solid #1e1e4a;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.bb-metric:hover,
+.metric-card:hover {
+    border-color: #ff3b3b40;
+    transform: translateY(-2px);
+}
+.bb-metric-val,
+.metric-val {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+    color: #ff3b3b;
+}
+.bb-metric-label,
+.metric-label {
+    font-size: 11px;
+    color: #555580;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+}
+
+/* Score card */
+.bb-score-card {
+    background: linear-gradient(135deg, #0e0e20, #120820);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+    margin: 16px 0;
+}
+
+/* Severity badges */
+.bb-badge {
+    display: inline-block;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 3px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Report card */
+.bb-report-card {
+    background: #0e0e20;
+    border: 1px solid #1e1e4a;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 8px 0;
+}
+.bb-report-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.bb-report-body {
+    font-size: 13px;
+    color: #a0a0c0;
+    line-height: 1.6;
+}
+
+/* Section divider */
+.bb-divider {
+    border: none;
+    border-top: 1px solid #1a1a3a;
+    margin: 20px 0;
+}
+
+/* Radio buttons */
+.stRadio label {
+    color: #a0a0c0 !important;
+    font-size: 13px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #080810; }
+::-webkit-scrollbar-thumb {
+    background: #ff3b3b40;
+    border-radius: 2px;
+}
+
+/* Hide Streamlit branding */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
+[data-testid="stDecoration"] { display: none; }
+[data-testid="stSidebarCollapseButton"] {
     display: none !important;
 }
 </style>
@@ -135,51 +326,72 @@ button[kind="headerNoPadding"] {
 
 # ─── SIDEBAR ──────────────────────────────────────────────
 with st.sidebar:
+    # Logo
     st.markdown("""
-    <div style='font-size:26px; font-weight:800;
-        background: linear-gradient(135deg, #ff3b3b, #ff8080);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        padding: 10px 0;'>
-        BREAKBOT
-    </div>
-    <div style='color:#a0a0b0; font-size:12px;
-                margin-bottom:10px;'>
-        AI Red-Team Security Agent
+    <div class="bb-logo">BREAKBOT</div>
+    <div class="bb-tagline">AI Red-Team Agent</div>
+    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:12px 0;"></div>
+    """, unsafe_allow_html=True)
+
+    # User card
+    st.markdown(f"""
+    <div class="bb-user-card">
+        <div class="bb-username">
+            {st.session_state.username}
+        </div>
+        <div class="bb-email">
+            {st.session_state.user_email}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown(f"**{st.session_state.username}**")
-    st.markdown(
-        f"<small style='color:#a0a0b0'>"
-        f"{st.session_state.user_email}</small>",
-        unsafe_allow_html=True)
+    # Navigation
+    st.markdown("""
+    <div style='font-size:10px; color:#333360;
+        text-transform:uppercase; letter-spacing:2px;
+        font-weight:600; margin-bottom:8px;'>
+        Navigation
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("**Navigation**")
-
-    if st.button("Run Scan", key="nav_scan"):
-        st.session_state.nav_page = "Run Scan"
-        st.rerun()
-
-    if st.button("My History", key="nav_history"):
-        st.session_state.nav_page = "My History"
-        st.rerun()
-
-    if st.button("Dashboard", key="nav_dashboard"):
-        st.session_state.nav_page = "Dashboard"
-        st.rerun()
-
+    nav_items = ["Run Scan", "My History", "Dashboard"]
     if st.session_state.get("is_admin", False):
-        if st.button("Admin Panel", key="nav_admin"):
-            st.session_state.nav_page = "Admin Panel"
-            st.rerun()
+        nav_items.append("Admin Panel")
 
-    st.markdown("---")
+    for item in nav_items:
+        active = st.session_state.nav_page == item
+        if active:
+            st.markdown(f"""
+            <div style='background:#ff3b3b15;
+                border:1px solid #ff3b3b40;
+                border-radius:8px;
+                padding:8px 16px;
+                color:#ff6b6b;
+                font-size:13px;
+                font-weight:600;
+                margin-bottom:4px;
+                cursor:pointer;'>
+                {item}
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            if st.button(item, key=f"nav_{item}"):
+                st.session_state.nav_page = item
+                st.rerun()
 
+    st.markdown("""
+    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:16px 0;"></div>
+    """, unsafe_allow_html=True)
+
+    # Input mode (only on Run Scan)
     if st.session_state.nav_page == "Run Scan":
-        st.markdown("**Input Mode**")
+        st.markdown("""
+        <div style='font-size:10px; color:#333360;
+            text-transform:uppercase; letter-spacing:2px;
+            font-weight:600; margin-bottom:8px;'>
+            Input Mode
+        </div>
+        """, unsafe_allow_html=True)
         mode = st.radio("",
             ["GitHub Repo", "Paste Code"],
             index=1,
@@ -187,22 +399,31 @@ with st.sidebar:
     else:
         mode = "Paste Code"
 
-    st.markdown("---")
+    st.markdown("""
+    <div class="bb-divider" style="border-top:1px solid #1a1a3a; margin:16px 0;"></div>
+    """, unsafe_allow_html=True)
+
     if st.button("Logout", key="logout_btn"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
 
-    st.markdown(
-        "<small style='color:#555'>Powered by "
-        "Google Gemini</small>",
-        unsafe_allow_html=True)
+    st.markdown("""
+    <div style='position:absolute; bottom:20px; left:16px;
+        right:16px; font-size:10px; color:#2a2a50;
+        text-align:center; text-transform:uppercase;
+        letter-spacing:1px;'>
+        Powered by Google Gemini
+    </div>
+    """, unsafe_allow_html=True)
 
 # ─── PAGE: MY HISTORY ─────────────────────────────────────
 if st.session_state.nav_page == "My History":
-    st.markdown(
-        '<div class="step-header">My Scan History</div>',
-        unsafe_allow_html=True)
+    st.markdown("""
+    <div class="step-header">
+        My Scan History
+    </div>
+    """, unsafe_allow_html=True)
     try:
         from database import get_user_history
         history = get_user_history(
@@ -308,9 +529,12 @@ if st.session_state.nav_page == "Dashboard":
     st.stop()
 
 # ─── PAGE: RUN SCAN ───────────────────────────────────────
-st.markdown(
-    '<div class="step-header">Step 1: Input</div>',
-    unsafe_allow_html=True)
+st.markdown("""
+<div class="step-header">
+    <div class="step-num">1</div>
+    Input
+</div>
+""", unsafe_allow_html=True)
 
 ingested = None
 
@@ -371,9 +595,12 @@ else:
 
 # ─── STEP 2: ANALYSIS ────────────────────────────────────
 if st.session_state.ingested_files:
-    st.markdown(
-        '<div class="step-header">Step 2: Analysis</div>',
-        unsafe_allow_html=True)
+    st.markdown("""
+    <div class="step-header">
+        <div class="step-num">2</div>
+        Analysis
+    </div>
+    """, unsafe_allow_html=True)
     if not st.session_state.analysis:
         with st.spinner("Analyzing code..."):
             try:
@@ -414,9 +641,12 @@ if st.session_state.ingested_files:
 
 # ─── STEP 3: ATTACK ───────────────────────────────────────
 if st.session_state.analysis:
-    st.markdown(
-        '<div class="step-header">Step 3: Attack</div>',
-        unsafe_allow_html=True)
+    st.markdown("""
+    <div class="step-header">
+        <div class="step-num">3</div>
+        Attack
+    </div>
+    """, unsafe_allow_html=True)
     if st.button("Launch Attack", key="attack_btn"):
         with st.spinner("Generating attack cases..."):
             try:
@@ -436,10 +666,12 @@ if st.session_state.analysis:
 
 # ─── STEP 4: RUN & REPORT ─────────────────────────────────
 if st.session_state.attack_code:
-    st.markdown(
-        '<div class="step-header">'
-        'Step 4: Run & Report</div>',
-        unsafe_allow_html=True)
+    st.markdown("""
+    <div class="step-header">
+        <div class="step-num">4</div>
+        Run & Report
+    </div>
+    """, unsafe_allow_html=True)
     if st.button("Run Tests", key="run_btn"):
         with st.spinner("Running tests..."):
             try:
@@ -456,22 +688,24 @@ if st.session_state.attack_code:
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-val">{total}</div>
-                <div class="metric-label">Total</div>
+            <div class="bb-metric">
+                <div class="bb-metric-val"
+                     style="color:#e8e8f0">{total}</div>
+                <div class="bb-metric-label">Total Tests</div>
             </div>""", unsafe_allow_html=True)
         with c2:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-val"
-                     style="color:#00ff88">{passed}</div>
-                <div class="metric-label">Passed</div>
+            <div class="bb-metric">
+                <div class="bb-metric-val"
+                     style="color:#00d97e">{passed}</div>
+                <div class="bb-metric-label">Passed</div>
             </div>""", unsafe_allow_html=True)
         with c3:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-val">{failed}</div>
-                <div class="metric-label">Failed</div>
+            <div class="bb-metric">
+                <div class="bb-metric-val"
+                     style="color:#ff3b3b">{failed}</div>
+                <div class="bb-metric-label">Failed</div>
             </div>""", unsafe_allow_html=True)
 
         weak_points = st.session_state.analysis.get(
@@ -482,10 +716,9 @@ if st.session_state.attack_code:
             st.session_state.test_results.get("total", 0)
         )
         st.markdown(f"""
-        <div style='background:#16213e;
+        <div class='bb-score-card' style='
             border:2px solid {score_data["color"]};
-            border-radius:12px;padding:24px;
-            text-align:center;margin:16px 0;'>
+            box-shadow:0 18px 50px rgba(0,0,0,0.25);'>
             <div style='font-size:56px;font-weight:800;
                 color:{score_data["color"]};'>
                 {score_data["score"]}
@@ -563,8 +796,104 @@ if st.session_state.attack_code:
             else:
                 fixes = st.session_state.get("fixes", [])
 
-            st.markdown("**Bug Attack Report**")
-            st.markdown(st.session_state.report)
+            # Parse and display report beautifully
+            st.markdown("""
+            <div style='background:#0e0e20;
+                border:1px solid #1e1e4a;
+                border-radius:16px; padding:28px;
+                margin:16px 0;'>
+                <div style='font-size:20px; font-weight:800;
+                    color:#ff3b3b; margin-bottom:4px;
+                    letter-spacing:1px;'>
+                    BUG ATTACK REPORT
+                </div>
+                <div style='font-size:12px; color:#333360;
+                    margin-bottom:20px;'>
+                    Generated by BreakBot AI Red-Team Agent
+                </div>
+            """, unsafe_allow_html=True)
+
+            functions = st.session_state.analysis.get(
+                "functions", [])
+            if functions:
+                st.markdown(f"""
+                <div class="bb-report-card">
+                    <div class="bb-report-title">
+                        Functions Analyzed ({len(functions)})
+                    </div>
+                    <div style='display:flex; flex-wrap:wrap; gap:6px;'>
+                        {"".join([
+                            f'<span style="background:#12122a;'
+                            f'border:1px solid #1e1e4a;'
+                            f'border-radius:6px;padding:3px 10px;'
+                            f'font-size:12px;color:#a0a0c0;'
+                            f'font-family:JetBrains Mono,monospace;">'
+                            f'{fn}</span>'
+                            for fn in functions
+                        ])}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            weak_points = st.session_state.analysis.get(
+                "weak_points", [])
+            if weak_points:
+                st.markdown("""
+                <div class="bb-report-card">
+                    <div class="bb-report-title">
+                        Vulnerabilities Found
+                    </div>
+                """, unsafe_allow_html=True)
+                for wp in weak_points:
+                    severity = get_severity(wp)
+                    color = get_severity_color(severity)
+                    st.markdown(f"""
+                    <div style='display:flex; align-items:center;
+                        gap:10px; padding:8px 0;
+                        border-bottom:1px solid #12122a;'>
+                        <span style='background:{color}22;
+                            border:1px solid {color}60;
+                            color:{color};border-radius:4px;
+                            padding:2px 8px;font-size:10px;
+                            font-weight:700;letter-spacing:1px;
+                            min-width:70px;text-align:center;'>
+                            {severity}
+                        </span>
+                        <span style='color:#c0c0d0;font-size:13px;'>
+                            {wp}
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            failures = st.session_state.test_results.get(
+                "failures", [])
+            if failures:
+                st.markdown("""
+                <div class="bb-report-card"
+                     style="border-color:#ff3b3b30;">
+                    <div class="bb-report-title"
+                         style="color:#ff3b3b;">
+                        Bugs Confirmed by Testing
+                    </div>
+                """, unsafe_allow_html=True)
+                for i, f in enumerate(failures, 1):
+                    st.markdown(f"""
+                    <div style='padding:10px 0;
+                        border-bottom:1px solid #12122a;'>
+                        <div style='font-size:13px;font-weight:600;
+                            color:#ff6b6b;margin-bottom:4px;'>
+                            Bug #{i}: {f.get('test_name','')}
+                        </div>
+                        <div style='font-size:12px;color:#666690;
+                            font-family:JetBrains Mono,monospace;'>
+                            {f.get('error','')[:200]}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            st.markdown("</div>", unsafe_allow_html=True)
             st.download_button(
                 label="Download Report",
                 data=st.session_state.report,
