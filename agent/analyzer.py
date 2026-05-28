@@ -86,6 +86,9 @@ class CodeAnalyzer:
 
         system = (
             "You are a code security expert. "
+            "You can analyze Python, JavaScript, TypeScript, "
+            "Java, Go, Ruby, PHP, C#, C++, C, Rust, Swift, "
+            "and Kotlin code. "
             "You MUST respond with ONLY a raw JSON object. "
             "No markdown, no code fences, no explanation. "
             "Start your response with { and end with }. "

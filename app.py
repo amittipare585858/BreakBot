@@ -6,8 +6,12 @@ from agent.analyzer import CodeAnalyzer
 from agent.attacker import AttackGenerator
 from agent.runner import TestRunner
 from agent.reporter import BugReporter
+from agent.pdf_reporter import generate_pdf_report
+from agent.scorer import get_severity, get_severity_color, calculate_score
+from agent.fix_suggester import FixSuggester
 from auth import show_login_page
 from database import save_scan_history
+from pages.dashboard import show_dashboard
 
 load_dotenv()
 
@@ -23,6 +27,7 @@ def init_session():
         "attack_code": "",
         "test_results": {},
         "report": "",
+        "fixes": [],
         "original_code": "",
         "ingested_files": [],
     }
@@ -143,6 +148,10 @@ with st.sidebar:
 
     if st.button("My History", key="nav_history"):
         st.session_state.nav_page = "My History"
+        st.rerun()
+
+    if st.button("Dashboard", key="nav_dashboard"):
+        st.session_state.nav_page = "Dashboard"
         st.rerun()
 
     if st.session_state.get("is_admin", False):
@@ -269,6 +278,13 @@ if st.session_state.nav_page == "Admin Panel":
         st.error(f"Admin error: {e}")
     st.stop()
 
+if st.session_state.nav_page == "Dashboard":
+    show_dashboard(
+        st.session_state.username,
+        st.session_state.get("is_admin", False)
+    )
+    st.stop()
+
 # ─── PAGE: RUN SCAN ───────────────────────────────────────
 st.markdown(
     '<div class="step-header">Step 1: Input</div>',
@@ -294,6 +310,11 @@ if mode == "GitHub Repo":
                             f['content']
                             for f in ingested["files"]
                         ])[:500]
+                    st.session_state.analysis = {}
+                    st.session_state.attack_code = ""
+                    st.session_state.test_results = {}
+                    st.session_state.report = ""
+                    st.session_state.fixes = []
                     st.success(
                         f"Ingested "
                         f"{len(ingested['files'])} files!")
@@ -320,6 +341,11 @@ else:
                 ingested["files"]
             st.session_state.original_code = \
                 code_input[:500]
+            st.session_state.analysis = {}
+            st.session_state.attack_code = ""
+            st.session_state.test_results = {}
+            st.session_state.report = ""
+            st.session_state.fixes = []
 
 # ─── STEP 2: ANALYSIS ────────────────────────────────────
 if st.session_state.ingested_files:
@@ -343,10 +369,19 @@ if st.session_state.ingested_files:
                 st.info("No weak points found")
             else:
                 for wp in weak_points:
+                    severity = get_severity(wp)
+                    color = get_severity_color(severity)
                     st.markdown(
-                        f'<span class="bb-badge">{wp}'
-                        f'</span>',
-                        unsafe_allow_html=True)
+                        f'<span style="display:inline-block;'
+                        f'background:{color}22;'
+                        f'border:1px solid {color}88;'
+                        f'color:{color};'
+                        f'border-radius:20px;'
+                        f'padding:4px 12px;'
+                        f'font-size:12px;margin:4px 2px;">'
+                        f'[{severity}] {wp}</span>',
+                        unsafe_allow_html=True
+                    )
 
 # ─── STEP 3: ATTACK ───────────────────────────────────────
 if st.session_state.analysis:
@@ -410,6 +445,36 @@ if st.session_state.attack_code:
                 <div class="metric-label">Failed</div>
             </div>""", unsafe_allow_html=True)
 
+        weak_points = st.session_state.analysis.get(
+            "weak_points", [])
+        score_data = calculate_score(
+            weak_points,
+            st.session_state.test_results.get("failed", 0),
+            st.session_state.test_results.get("total", 0)
+        )
+        st.markdown(f"""
+        <div style='background:#16213e;
+            border:2px solid {score_data["color"]};
+            border-radius:12px;padding:24px;
+            text-align:center;margin:16px 0;'>
+            <div style='font-size:56px;font-weight:800;
+                color:{score_data["color"]};'>
+                {score_data["score"]}
+            </div>
+            <div style='font-size:16px;font-weight:600;
+                color:{score_data["color"]};'>
+                {score_data["label"]}
+            </div>
+            <div style='color:#a0a0b0;font-size:12px;
+                margin-top:12px;'>
+                Critical: {score_data["critical"]} |
+                High: {score_data["high"]} |
+                Medium: {score_data["medium"]} |
+                Low: {score_data["low"]}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
         if not st.session_state.report:
             with st.spinner("Generating report..."):
                 try:
@@ -442,6 +507,33 @@ if st.session_state.attack_code:
                     st.error(f"Report error: {e}")
 
         if st.session_state.report:
+            if not st.session_state.get("fixes"):
+                with st.spinner("Generating fix suggestions..."):
+                    try:
+                        weak_points_for_fixes = (
+                            st.session_state.analysis.get(
+                                "weak_points", [])
+                        )
+                        if not weak_points_for_fixes:
+                            fixes = []
+                            st.session_state["fixes"] = fixes
+                        else:
+                            suggester = FixSuggester()
+                            original = "\n".join([
+                                f['content']
+                                for f in st.session_state.ingested_files
+                            ])
+                            fixes = suggester.suggest_all_fixes(
+                                weak_points_for_fixes,
+                                original
+                            )
+                            st.session_state["fixes"] = fixes
+                    except Exception as e:
+                        print(f"Fix suggestion error: {e}")
+                        fixes = []
+            else:
+                fixes = st.session_state.get("fixes", [])
+
             st.markdown("**Bug Attack Report**")
             st.markdown(st.session_state.report)
             st.download_button(
@@ -450,3 +542,35 @@ if st.session_state.attack_code:
                 file_name="breakbot_report.md",
                 mime="text/markdown"
             )
+
+            if fixes:
+                st.markdown("### Fix Suggestions")
+                for i, fix in enumerate(fixes, 1):
+                    with st.expander(
+                        f"Fix #{i}: "
+                        f"{fix.get('weak_point','')[:60]}"
+                    ):
+                        st.markdown(f"**Issue:** "
+                                   f"{fix.get('issue','')}")
+                        st.code(fix.get('fix_code',''),
+                               language='python')
+                        st.markdown(f"**Why:** "
+                                   f"{fix.get('explanation','')}")
+
+            try:
+                pdf_path = generate_pdf_report(
+                    repo_name="pasted_code",
+                    analysis=st.session_state.analysis,
+                    test_results=st.session_state.test_results,
+                    fixes=st.session_state.get("fixes", []),
+                    username=st.session_state.username
+                )
+                with open(pdf_path, "rb") as f:
+                    st.download_button(
+                        label="Download PDF Report",
+                        data=f,
+                        file_name="BreakBot_Report.pdf",
+                        mime="application/pdf"
+                    )
+            except Exception as e:
+                st.error(f"PDF generation error: {e}")

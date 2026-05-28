@@ -10,7 +10,23 @@ import requests
 
 
 logger = logging.getLogger(__name__)
-SUPPORTED_EXTENSIONS = (".py", ".js", ".ts", ".java", ".go")
+SUPPORTED_EXTENSIONS = [
+    '.py',   # Python
+    '.js',   # JavaScript
+    '.ts',   # TypeScript
+    '.jsx',  # React
+    '.tsx',  # React TypeScript
+    '.java', # Java
+    '.go',   # Go
+    '.rb',   # Ruby
+    '.php',  # PHP
+    '.cs',   # C#
+    '.cpp',  # C++
+    '.c',    # C
+    '.rs',   # Rust
+    '.swift',# Swift
+    '.kt',   # Kotlin
+]
 SKIP_PARTS = {"node_modules", "__pycache__", ".git"}
 MAX_FILE_BYTES = 100 * 1024
 GITHUB_API = "https://api.github.com"
@@ -81,7 +97,7 @@ class RepoIngester:
 
         if not files:
             raise ValueError(
-                "No supported source files found. BreakBot supports .py, .js, .ts, .java, and .go."
+                "No supported source files found. BreakBot supports Python, JavaScript, TypeScript, Java, Go, Ruby, PHP, C#, C++, C, Rust, Swift, and Kotlin."
             )
 
         logger.info("Ingested %s files from %s", len(files), repo_name)
@@ -115,4 +131,4 @@ class RepoIngester:
         parts = set(path.split("/"))
         if parts & SKIP_PARTS:
             return False
-        return path.endswith(SUPPORTED_EXTENSIONS)
+        return path.endswith(tuple(SUPPORTED_EXTENSIONS))
