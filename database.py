@@ -46,7 +46,11 @@ def register_user(username: str, email: str, password: str) -> dict:
             .execute()
         )
         if existing.data:
-            return {"success": False, "error": "Username already taken"}
+            return {
+                "success": False,
+                "error": "Username already taken. "
+                         "Please choose a different username.",
+            }
         existing_email = (
             supabase.table("users")
             .select("email")
@@ -54,7 +58,11 @@ def register_user(username: str, email: str, password: str) -> dict:
             .execute()
         )
         if existing_email.data:
-            return {"success": False, "error": "Email already registered"}
+            return {
+                "success": False,
+                "error": "Email already registered. "
+                         "Please use a different email or login.",
+            }
         supabase.table("users").insert(
             {
                 "username": username,

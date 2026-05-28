@@ -56,71 +56,10 @@ def register_user(username: str, password: str) -> bool:
     return True
 
 
-def is_valid_email_format(email: str) -> bool:
-    """Check basic email format."""
+def is_valid_email(email: str) -> bool:
+    """Check if email format is valid - any provider."""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email))
-
-
-def is_valid_gmail(email: str) -> bool:
-    """Check if email is a valid Gmail address."""
-    pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
-    return bool(re.match(pattern, email))
-
-
-def validate_email_exists(email: str) -> dict:
-    """
-    Validate email using Abstract API (free tier).
-    Returns dict with is_valid_format, is_gmail,
-    deliverable status.
-    """
-    result = {
-        "is_valid_format": False,
-        "is_gmail": False,
-        "is_deliverable": False,
-        "error": None
-    }
-
-    # Check format first
-    if not is_valid_email_format(email):
-        result["error"] = "Invalid email format"
-        return result
-    result["is_valid_format"] = True
-
-    # Check Gmail requirement
-    if not is_valid_gmail(email):
-        result["error"] = "Only Gmail addresses (@gmail.com) are allowed"
-        return result
-    result["is_gmail"] = True
-
-    # Check if Gmail account could be real
-    # Gmail usernames must be 6-30 characters
-    username = email.split("@")[0]
-    if len(username) < 6:
-        result["error"] = "Gmail username too short (min 6 characters)"
-        return result
-    if len(username) > 30:
-        result["error"] = "Gmail username too long (max 30 characters)"
-        return result
-
-    # Check for invalid characters in Gmail
-    gmail_pattern = r'^[a-zA-Z0-9.]+$'
-    if not re.match(gmail_pattern, username):
-        result["error"] = "Gmail can only contain letters, numbers, and dots"
-        return result
-
-    # Check Gmail doesn't start or end with dot
-    if username.startswith('.') or username.endswith('.'):
-        result["error"] = "Gmail cannot start or end with a dot"
-        return result
-
-    # Check no consecutive dots
-    if '..' in username:
-        result["error"] = "Gmail cannot have consecutive dots"
-        return result
-
-    result["is_deliverable"] = True
-    return result
 
 
 def show_login_page() -> None:
@@ -223,32 +162,18 @@ def show_login_page() -> None:
             )
 
         with tab2:
+            from database import register_user as register_database_user
+
             new_user = st.text_input(
                 "Choose Username",
                 key="reg_user",
                 placeholder="Enter username",
             )
             new_email = st.text_input(
-                "Gmail Address",
+                "Email Address",
                 key="reg_email",
-                placeholder="yourname@gmail.com",
+                placeholder="name@example.com",
             )
-            if new_email:
-                if not is_valid_email_format(new_email):
-                    st.markdown(
-                        "<small style='color:#ff3b3b'>"
-                        "Invalid email format</small>",
-                        unsafe_allow_html=True)
-                elif not is_valid_gmail(new_email):
-                    st.markdown(
-                        "<small style='color:#ff3b3b'>"
-                        "Only @gmail.com allowed</small>",
-                        unsafe_allow_html=True)
-                else:
-                    st.markdown(
-                        "<small style='color:#00ff88'>"
-                        "Valid Gmail address</small>",
-                        unsafe_allow_html=True)
             new_pass = st.text_input(
                 "Choose Password",
                 type="password",
@@ -265,35 +190,26 @@ def show_login_page() -> None:
             if st.button("Create Account", key="reg_btn"):
                 if not all([new_user, new_email, new_pass, confirm_pass]):
                     st.error("Please fill in all fields")
+                elif not is_valid_email(new_email):
+                    st.error(
+                        "Invalid email format. "
+                        "Example: name@gmail.com or "
+                        "name@yahoo.com")
+                elif len(new_pass) < 6:
+                    st.error(
+                        "Password must be at least "
+                        "6 characters")
+                elif new_pass != confirm_pass:
+                    st.error("Passwords do not match")
                 else:
-                    # Validate email thoroughly
-                    with st.spinner("Validating email..."):
-                        email_check = validate_email_exists(new_email)
-
-                    if not email_check["is_valid_format"]:
-                        st.error(
-                            "Invalid email format. "
-                            "Example: yourname@gmail.com")
-                    elif not email_check["is_gmail"]:
-                        st.error(
-                            "Only Gmail addresses allowed. "
-                            "Please use yourname@gmail.com")
-                    elif not email_check["is_deliverable"]:
-                        st.error(
-                            f"Invalid Gmail: "
-                            f"{email_check['error']}")
-                    elif len(new_pass) < 6:
-                        st.error(
-                            "Password must be at least "
-                            "6 characters")
-                    elif new_pass != confirm_pass:
-                        st.error("Passwords do not match")
-                    elif register_user(new_user, new_pass):
+                    result = register_database_user(
+                        new_user, new_email, new_pass)
+                    if result["success"]:
                         st.success(
                             "Account created! "
                             "Please login.")
                     else:
-                        st.error("Username already taken")
+                        st.error(result["error"])
 
 
 def show_user_history():
