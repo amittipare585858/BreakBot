@@ -9,20 +9,40 @@ import streamlit as st
 
 
 def get_supabase():
-    """Create and return a Supabase client, or None on failure."""
     try:
         from supabase import create_client
+        url = None
+        key = None
 
+        # Try Streamlit secrets first
         try:
-            url = st.secrets["SUPABASE_URL"]
-            key = st.secrets["SUPABASE_KEY"]
+            import streamlit as st
+
+            url = st.secrets.get("SUPABASE_URL", "")
+            key = st.secrets.get("SUPABASE_KEY", "")
         except Exception:
+            pass
+
+        # Fall back to .env
+        if not url or not key:
             from dotenv import load_dotenv
 
             load_dotenv()
             url = os.getenv("SUPABASE_URL", "")
             key = os.getenv("SUPABASE_KEY", "")
-        return create_client(url, key)
+
+        # Remove trailing slash or /rest/v1/
+        if url:
+            url = url.rstrip("/")
+            url = url.replace("/rest/v1", "")
+
+        if not url or not key:
+            print("Missing SUPABASE_URL or SUPABASE_KEY")
+            return None
+
+        client = create_client(url, key)
+        return client
+
     except Exception as e:
         print(f"Supabase connection error: {e}")
         return None
