@@ -113,12 +113,6 @@ st.markdown("""
     background: #ff3b3b50;
     border-radius: 3px;
 }
-.streamlit-expanderHeader svg {
-    display: none !important;
-}
-[data-testid="stExpander"] summary::before {
-    content: "" !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -202,26 +196,31 @@ if st.session_state.nav_page == "My History":
                 "Go to Run Scan to analyze your first repo.")
         else:
             for i, scan in enumerate(history):
-                with st.expander(
-                    f"Scan {i + 1} | "
-                    f"{str(scan.get('scanned_at',''))[:16]}"
-                    f" | Bugs Found: "
-                    f"{scan.get('bugs_found', 0)}"
-                ):
-                    c1, c2 = st.columns(2)
-                    with c1:
-                        st.metric("Weak Points",
-                            scan.get('weak_points_found', 0))
-                    with c2:
-                        st.metric("Bugs Found",
-                            scan.get('bugs_found', 0))
-                    if scan.get("code_snippet"):
-                        with st.expander("Code Snippet"):
-                            st.code(scan["code_snippet"])
-                    if scan.get("report_content"):
-                        with st.expander("Full Report"):
-                            st.markdown(
-                                scan["report_content"])
+                st.markdown(f"""
+                <div style='background:#16213e;
+                    border:1px solid #ff3b3b20;
+                    border-radius:10px;
+                    padding:16px; margin:8px 0;'>
+                    <div style='color:#ff3b3b; font-weight:700;'>
+                        Scan {i + 1} |
+                        {str(scan.get('scanned_at',''))[:16]} |
+                        Bugs: {scan.get('bugs_found', 0)}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.metric("Weak Points",
+                        scan.get('weak_points_found', 0))
+                with c2:
+                    st.metric("Bugs Found",
+                        scan.get('bugs_found', 0))
+                if scan.get("code_snippet"):
+                    st.markdown("**Code Snippet:**")
+                    st.code(scan["code_snippet"])
+                if scan.get("report_content"):
+                    st.markdown(scan["report_content"][:500])
+                st.markdown("---")
     except Exception as e:
         st.error(f"Could not load history: {e}")
     st.stop()
@@ -368,26 +367,33 @@ if st.session_state.ingested_files:
             except Exception as e:
                 st.error(f"Analysis error: {e}")
     if st.session_state.analysis:
-        with st.expander("Analysis Results", expanded=True):
-            weak_points = st.session_state.analysis.get(
-                "weak_points", [])
-            if not weak_points:
-                st.info("No weak points found")
-            else:
-                for wp in weak_points:
-                    severity = get_severity(wp)
-                    color = get_severity_color(severity)
-                    st.markdown(
-                        f'<span style="display:inline-block;'
-                        f'background:{color}22;'
-                        f'border:1px solid {color}88;'
-                        f'color:{color};'
-                        f'border-radius:20px;'
-                        f'padding:4px 12px;'
-                        f'font-size:12px;margin:4px 2px;">'
-                        f'[{severity}] {wp}</span>',
-                        unsafe_allow_html=True
-                    )
+        st.markdown("**Analysis Results:**")
+        weak_points = st.session_state.analysis.get(
+            "weak_points", [])
+        if not weak_points:
+            st.info("No weak points found")
+        else:
+            st.markdown(
+                '<div style="background:#16213e; '
+                'border:1px solid #ff3b3b20; '
+                'border-radius:12px; padding:20px; '
+                'margin:10px 0;">',
+                unsafe_allow_html=True)
+            for wp in weak_points:
+                severity = get_severity(wp)
+                color = get_severity_color(severity)
+                st.markdown(
+                    f'<span style="display:inline-block;'
+                    f'background:{color}22;'
+                    f'border:1px solid {color}88;'
+                    f'color:{color};'
+                    f'border-radius:20px;'
+                    f'padding:4px 12px;'
+                    f'font-size:12px;margin:4px 2px;">'
+                    f'[{severity}] {wp}</span>',
+                    unsafe_allow_html=True
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # ─── STEP 3: ATTACK ───────────────────────────────────────
 if st.session_state.analysis:
@@ -552,16 +558,26 @@ if st.session_state.attack_code:
             if fixes:
                 st.markdown("### Fix Suggestions")
                 for i, fix in enumerate(fixes, 1):
-                    with st.expander(
-                        f"Fix {i}: "
-                        f"{fix.get('weak_point','')[:60]}"
-                    ):
-                        st.markdown(f"**Issue:** "
-                                   f"{fix.get('issue','')}")
-                        st.code(fix.get('fix_code',''),
-                               language='python')
-                        st.markdown(f"**Why:** "
-                                   f"{fix.get('explanation','')}")
+                    st.markdown(f"""
+                    <div style='background:#16213e;
+                        border:1px solid #ff3b3b30;
+                        border-radius:10px;
+                        padding:16px; margin:8px 0;'>
+                        <div style='color:#ff3b3b; font-weight:700;
+                            margin-bottom:8px;'>
+                            Fix #{i}: {fix.get('weak_point','')[:60]}
+                        </div>
+                        <div style='color:#a0a0b0; font-size:13px;'>
+                            Issue: {fix.get('issue','')}
+                        </div>
+                        <div style='color:#a0a0b0; font-size:13px;
+                            margin-top:6px;'>
+                            Why: {fix.get('explanation','')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.code(fix.get('fix_code',''),
+                           language='python')
 
             try:
                 pdf_path = generate_pdf_report(
