@@ -147,13 +147,28 @@ def show_login_page() -> None:
             if st.button("Login", key="login_btn"):
                 if not username or not password:
                     st.error("Please fill in all fields")
-                elif verify_user(username, password):
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                    st.success(f"Welcome back, {username}!")
-                    st.rerun()
                 else:
-                    st.error("Invalid username or password")
+                    try:
+                        from database import verify_user
+                        user = verify_user(
+                            username.strip(),
+                            password.strip()
+                        )
+                        if user:
+                            st.session_state.logged_in = True
+                            st.session_state.username = \
+                                user["username"]
+                            st.session_state.is_admin = \
+                                user.get("is_admin", False)
+                            st.session_state.user_email = \
+                                user.get("email", "")
+                            st.rerun()
+                        else:
+                            st.error(
+                                "Invalid username or password. "
+                                "Please try again.")
+                    except Exception as e:
+                        st.error(f"Login error: {e}")
 
             st.markdown("---")
             st.markdown(
