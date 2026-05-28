@@ -113,6 +113,23 @@ st.markdown("""
     background: #ff3b3b50;
     border-radius: 3px;
 }
+/* Hide broken sidebar collapse icon */
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+button[kind="headerNoPadding"] {
+    display: none !important;
+}
+[data-testid="stSidebarCollapseButton"] {
+    display: none !important;
+}
+.st-emotion-cache-h4xjwg {
+    display: none !important;
+}
+/* Hide any text rendering as icon names */
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
