@@ -564,8 +564,9 @@ if st.session_state.nav_page == "My History":
             
             # If a scan is selected show its detail
             if st.session_state.selected_scan is not None:
+                i = st.session_state.selected_scan
                 scan = history[
-                    st.session_state.selected_scan]
+                    i]
                 
                 # Back button
                 if st.button(
@@ -626,12 +627,69 @@ if st.session_state.nav_page == "My History":
                     </div>
                     """, unsafe_allow_html=True)
                 
-                # Report content
+                # Download options
                 if scan.get("report_content"):
+                    st.markdown("---")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        # Download as Markdown
+                        st.download_button(
+                            label="Download MD Report",
+                            data=scan["report_content"],
+                            file_name=f"BreakBot_Scan_{i+1}_Report.md",
+                            mime="text/markdown",
+                            key=f"dl_md_{i}"
+                        )
+                    
+                    with col2:
+                        # Generate and download PDF
+                        try:
+                            from agent.pdf_reporter import (
+                                generate_pdf_report)
+                            
+                            # Build minimal analysis 
+                            # and results from history
+                            hist_analysis = {
+                                "functions": [],
+                                "weak_points": [],
+                                "attack_surfaces": []
+                            }
+                            hist_results = {
+                                "total": 0,
+                                "passed": 0,
+                                "failed": scan.get(
+                                    "bugs_found", 0),
+                                "failures": []
+                            }
+                            
+                            pdf_path = generate_pdf_report(
+                                repo_name=f"scan_{i+1}",
+                                analysis=hist_analysis,
+                                test_results=hist_results,
+                                fixes=[],
+                                username=st.session_state.username
+                            )
+                            
+                            with open(pdf_path, "rb") as f:
+                                pdf_data = f.read()
+                            
+                            st.download_button(
+                                label="Download PDF Report",
+                                data=pdf_data,
+                                file_name=f"BreakBot_Scan_{i+1}_Report.pdf",
+                                mime="application/pdf",
+                                key=f"dl_pdf_{i}"
+                            )
+                        except Exception as e:
+                            st.error(
+                                f"PDF error: {e}")
+                    
                     st.markdown("---")
                     st.markdown("**Full Report:**")
                     st.markdown(
-                        scan["report_content"][:2000])
+                        scan["report_content"])
             
             else:
                 # Show list of scans as cards
