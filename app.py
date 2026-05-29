@@ -15,7 +15,7 @@ from pages.dashboard import show_dashboard
 
 load_dotenv()
 
-# ─── SESSION STATE INIT ───────────────────────────────────
+# â”€â”€â”€ SESSION STATE INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def init_session():
     defaults = {
         "logged_in": False,
@@ -37,437 +37,154 @@ def init_session():
 
 init_session()
 
-# ─── LOGIN GATE ───────────────────────────────────────────
+# â”€â”€â”€ LOGIN GATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if not st.session_state.logged_in:
     show_login_page()
     st.stop()
 
-# ─── GLOBAL CSS ───────────────────────────────────────────
+# â”€â”€â”€ GLOBAL CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Reset and base */
-* { font-family: 'Inter', sans-serif !important; }
-
-/* Main background - WHITE */
+/* ── BASE ── */
+*, *::before, *::after {
+    font-family: 'Inter', sans-serif !important;
+    box-sizing: border-box;
+}
 .stApp {
-    background: #ffffff !important;
-    color: #1a1a2e !important;
-}
-body { color: #1a1a2e !important; }
-p { color: #333355 !important; }
-h1, h2, h3 { color: #1a1a2e !important; }
-
-/* Hide unwanted elements */
-/* Hide sidebar collapse button completely */
-[data-testid="stSidebarCollapseButton"] {
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    position: absolute !important;
-}
-button[data-testid="stSidebarCollapseButton"] {
-    display: none !important;
-}
-/* Hide ALL header buttons */
-[data-testid="stHeader"] button {
-    display: none !important;
-}
-[data-testid="stHeader"] {
-    background: transparent !important;
-    height: 0 !important;
-    min-height: 0 !important;
-}
-[data-testid="stSidebarNav"] { display:none !important; }
-[data-testid="stSidebarNavItems"] { display:none !important; }
-ul[data-testid="stSidebarNavItems"] { display:none !important; }
-[data-testid="stSidebarNavSeparator"] { display:none !important; }
-[data-testid="stDecoration"] { display:none !important; }
-.st-emotion-cache-1dp5vir { display:none !important; }
-#MainMenu { visibility:hidden; }
-footer { visibility:hidden; }
-[data-testid="stToolbar"] { display:none; }
-
-/* Sidebar - Light gray */
-[data-testid="stSidebar"] {
-    background: #f8f8fc !important;
-    border-right: 1px solid #e8e8f0 !important;
-}
-[data-testid="stSidebar"] > div {
-    padding: 24px 16px !important;
+    background: #080810 !important;
+    color: #e8e8f0 !important;
 }
 
-/* Sidebar logo */
-.bb-logo {
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    color: #ff3b3b;
-    margin-bottom: 4px;
-}
-.bb-tagline {
-    font-size: 10px;
-    color: #9999bb;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-}
-
-/* User card */
-.bb-user-card {
-    background: #ffffff;
-    border: 1px solid #e8e8f0;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.bb-username {
-    font-weight: 700;
-    font-size: 14px;
-    color: #1a1a2e;
-}
-.bb-email {
-    font-size: 11px;
-    color: #9999bb;
-    margin-top: 2px;
-}
-
-/* Nav section label */
-.bb-nav-label {
-    font-size: 10px;
-    color: #9999bb;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-/* Navigation buttons */
-.stButton > button {
-    background: #ffffff !important;
-    color: #555580 !important;
-    border: 1px solid #e8e8f0 !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
-    padding: 8px 16px !important;
-    width: 100% !important;
-    text-align: left !important;
-    transition: all 0.2s ease !important;
-    margin-bottom: 4px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-}
-.stButton > button:hover {
-    background: #fff0f0 !important;
-    border-color: #ff3b3b60 !important;
-    color: #ff3b3b !important;
-    transform: translateX(3px) !important;
-}
-
-/* Active nav item */
-.bb-nav-active {
-    background: #fff0f0;
-    border: 1px solid #ff3b3b60;
-    border-radius: 8px;
-    padding: 8px 16px;
-    color: #ff3b3b;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-/* Primary buttons */
-div[data-testid="stButton"] button[kind="primary"],
-.primary-action button {
-    background: linear-gradient(
-        135deg, #ff3b3b, #cc0000) !important;
-    color: white !important;
-    border: none !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(255,59,59,0.3) !important;
-}
-.step-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #fff5f5, #fff0f0);
-    border-left: 3px solid #ff3b3b;
-    border-radius: 0 10px 10px 0;
-    margin: 24px 0 16px 0;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #1a1a2e;
-    box-shadow: 0 2px 8px rgba(255,59,59,0.08);
-}
-.step-num {
-    background: #ff3b3b;
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-
-/* Input fields */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea {
-    background: #ffffff !important;
-    border: 1px solid #e8e8f0 !important;
-    border-radius: 8px !important;
-    color: #1a1a2e !important;
-    font-size: 14px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-}
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
-    border-color: #ff3b3b80 !important;
-    box-shadow: 0 0 0 3px rgba(255,59,59,0.1) !important;
-}
-
-/* Code blocks */
-.stCodeBlock {
-    border-radius: 10px !important;
-    border: 1px solid #1e1e4a !important;
-}
-
-/* Cards */
-.bb-card {
-    background: #ffffff;
-    border: 1px solid #e8e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 8px 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-/* Metric cards */
-.bb-metric,
-.metric-card {
-    background: #ffffff;
-    border: 1px solid #e8e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.bb-metric-val,
-.metric-val {
-    font-size: 40px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 6px;
-}
-.bb-metric-label,
-.metric-label {
-    font-size: 11px;
-    color: #9999bb;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-weight: 500;
-}
-
-/* Score card */
-.bb-score-card {
-    background: linear-gradient(135deg, #fff5f5, #fff0f0);
-    border: 1px solid #ffdddd;
-    border-radius: 16px;
-    padding: 24px;
-    text-align: center;
-    margin: 16px 0;
-}
-
-/* Severity badges */
-.bb-badge {
-    display: inline-block;
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    margin: 3px;
-    font-family: 'Inter', sans-serif;
-}
-
-/* Report section */
-.bb-report-header {
-    background: linear-gradient(135deg, #ff3b3b, #cc0000);
-    color: white;
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-.bb-report-body {
-    background: #ffffff;
-    border: 1px solid #e8e8f0;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    padding: 20px 24px;
-}
-.bb-report-section {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f0f0f8;
-}
-.bb-report-section-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #9999bb;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-}
-
-/* Bug item */
-.bb-bug-item {
-    background: #fff5f5;
-    border: 1px solid #ffdddd;
-    border-left: 3px solid #ff3b3b;
-    border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
-    margin: 6px 0;
-}
-.bb-bug-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #cc0000;
-}
-.bb-bug-error {
-    font-size: 12px;
-    color: #888;
-    font-family: 'JetBrains Mono', monospace;
-    margin-top: 4px;
-}
-
-/* Function tags */
-.bb-fn-tag {
-    display: inline-block;
-    background: #f5f5ff;
-    border: 1px solid #e0e0f0;
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 12px;
-    color: #555580;
-    font-family: 'JetBrains Mono', monospace;
-    margin: 3px;
-}
-
-/* Weakness item */
-.bb-weak-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #f5f5ff;
-}
-
-/* Section divider */
-.bb-divider {
-    border: none;
-    border-top: 1px solid #f0f0f8;
-    margin: 16px 0;
-}
-
-/* Radio buttons */
-.stRadio label {
-    color: #333355 !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-}
-.stRadio > div {
-    gap: 8px !important;
-}
-[data-testid="stRadio"] label {
-    color: #333355 !important;
-}
-[data-testid="stRadio"] span {
-    color: #333355 !important;
-}
-/* Radio button fix */
-.stRadio > label {
-    color: #333355 !important;
-}
-.stRadio [data-testid="stMarkdownContainer"] p {
-    color: #333355 !important;
-    background: transparent !important;
-}
-div[role="radiogroup"] label {
-    color: #333355 !important;
-    background: transparent !important;
-}
-div[role="radiogroup"] label span {
-    color: #333355 !important;
-    background: transparent !important;
-}
-
-/* Tabs */
-.stTabs [data-baseweb="tab-list"] {
-    background: #f5f5ff !important;
-    border-radius: 10px !important;
-    padding: 4px !important;
-    border: 1px solid #e8e8f0 !important;
-}
-.stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: #9999bb !important;
-    border-radius: 8px !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-}
-.stTabs [aria-selected="true"] {
-    background: #ff3b3b !important;
-    color: white !important;
-    font-weight: 600 !important;
-}
-
-/* Dataframe */
-.stDataFrame {
-    border: 1px solid #e8e8f0 !important;
-    border-radius: 8px !important;
-}
-
-/* Success/error messages */
-.stSuccess {
-    background: #f0fff8 !important;
-    border: 1px solid #00cc88 !important;
-    color: #006644 !important;
-}
-.stError {
-    background: #fff5f5 !important;
-    border: 1px solid #ffaaaa !important;
-    color: #cc0000 !important;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #f8f8fc; }
-::-webkit-scrollbar-thumb {
-    background: #ff3b3b40;
-    border-radius: 2px;
-}
-
-/* Hide Streamlit branding */
+/* ── HIDE UNWANTED ── */
+[data-testid="stSidebarNav"] { display: none !important; }
+[data-testid="stSidebarNavItems"] { display: none !important; }
+[data-testid="stDecoration"] { display: none !important; }
+.st-emotion-cache-1dp5vir { display: none !important; }
+[data-testid="stSidebarCollapseButton"] { visibility: hidden !important; }
+[data-testid="stHeader"] { background: transparent !important; height: 0 !important; }
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-[data-testid="stToolbar"] { display: none; }
-[data-testid="stDecoration"] { display: none; }
+[data-testid="stToolbar"] { display: none !important; }
+
+/* ── SIDEBAR ── */
+[data-testid="stSidebar"] {
+    background: #0c0c18 !important;
+    border-right: 1px solid #1a1a3a !important;
+}
+[data-testid="stSidebar"] > div { padding: 28px 20px !important; }
+
+/* ── LOGO ── */
+.bb-logo { font-size: 20px; font-weight: 900; letter-spacing: 4px; color: #ff3b3b; margin-bottom: 4px; }
+.bb-tagline { font-size: 10px; color: #333360; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+
+/* ── USER CARD ── */
+.bb-user-card { background: #12122a; border: 1px solid #1a1a3a; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; }
+.bb-username { font-weight: 700; font-size: 14px; color: #ffffff; margin-bottom: 2px; }
+.bb-email { font-size: 11px; color: #555580; }
+
+/* ── NAV LABEL ── */
+.bb-nav-label { font-size: 10px; color: #333360; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 10px; }
+
+/* ── NAV ACTIVE ── */
+.bb-nav-active { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); border-radius: 8px; padding: 9px 16px; color: #ff6b6b; font-size: 13px; font-weight: 600; margin-bottom: 6px; letter-spacing: 0.3px; }
+
+/* ── ALL BUTTONS ── */
+.stButton > button { background: #12122a !important; color: #a0a0c0 !important; border: 1px solid #1a1a3a !important; border-radius: 8px !important; font-weight: 500 !important; font-size: 13px !important; padding: 9px 16px !important; width: 100% !important; transition: all 0.2s ease !important; margin-bottom: 6px !important; letter-spacing: 0.2px !important; }
+.stButton > button:hover { background: rgba(255,59,59,0.1) !important; border-color: rgba(255,59,59,0.4) !important; color: #ff6b6b !important; transform: translateX(3px) !important; }
+
+/* ── STEP HEADERS ── */
+.step-header { display: flex; align-items: center; gap: 14px; padding: 16px 22px; background: linear-gradient(135deg, #120808, #1a0a0a); border-left: 3px solid #ff3b3b; border-radius: 0 12px 12px 0; margin: 28px 0 20px 0; font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.3px; box-shadow: 0 4px 20px rgba(255,59,59,0.08); }
+.step-num { background: #ff3b3b; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+
+/* ── INPUT FIELDS ── */
+.stTextInput > label, .stTextArea > label { color: #555580 !important; font-size: 12px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+.stTextInput > div > div > input, .stTextArea > div > div > textarea { background: #0c0c18 !important; border: 1px solid #1a1a3a !important; border-radius: 8px !important; color: #e8e8f0 !important; font-size: 14px !important; font-family: 'Inter', sans-serif !important; }
+.stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus { border-color: rgba(255,59,59,0.5) !important; box-shadow: 0 0 0 3px rgba(255,59,59,0.1) !important; }
+.stTextInput > div > div > input::placeholder, .stTextArea > div > div > textarea::placeholder { color: #333360 !important; }
+
+/* ── RADIO BUTTONS ── */
+.stRadio > label { color: #555580 !important; font-size: 11px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+div[role="radiogroup"] label { color: #a0a0c0 !important; font-size: 13px !important; }
+div[role="radiogroup"] label span { color: #a0a0c0 !important; }
+
+/* ── METRIC CARDS ── */
+.bb-metric { background: #0c0c18; border: 1px solid #1a1a3a; border-radius: 14px; padding: 24px 20px; text-align: center; transition: all 0.2s ease; }
+.bb-metric:hover { border-color: rgba(255,59,59,0.3); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+.bb-metric-val { font-size: 44px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+.bb-metric-label { font-size: 10px; color: #333360; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+
+/* ── CARDS ── */
+.bb-card { background: #0c0c18; border: 1px solid #1a1a3a; border-radius: 14px; padding: 24px; margin: 10px 0; transition: all 0.2s; }
+.bb-card:hover { border-color: rgba(255,59,59,0.2); }
+
+/* ── SEVERITY BADGES ── */
+.bb-badge { display: inline-block; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; margin: 3px; letter-spacing: 0.5px; }
+
+/* ── REPORT ── */
+.bb-report-header { background: linear-gradient(135deg, #ff3b3b, #cc0000); color: white; padding: 22px 28px; border-radius: 14px 14px 0 0; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+.bb-report-body { background: #0c0c18; border: 1px solid #1a1a3a; border-top: none; border-radius: 0 0 14px 14px; padding: 24px 28px; }
+.bb-report-section { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #12122a; }
+.bb-report-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.bb-report-section-title { font-size: 10px; font-weight: 700; color: #333360; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+.bb-fn-tag { display: inline-block; background: #12122a; border: 1px solid #1a1a3a; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #a0a0c0; font-family: 'JetBrains Mono', monospace; margin: 3px; }
+.bb-weak-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #0e0e20; }
+.bb-weak-item:last-child { border-bottom: none; }
+.bb-bug-item { background: rgba(255,59,59,0.05); border: 1px solid rgba(255,59,59,0.15); border-left: 3px solid #ff3b3b; border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 8px 0; }
+.bb-bug-name { font-size: 13px; font-weight: 700; color: #ff6b6b; margin-bottom: 4px; }
+.bb-bug-error { font-size: 11px; color: #555580; font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+
+/* ── SCORE CARD ── */
+.bb-score-card { background: linear-gradient(135deg, #120808, #1a0808); border: 1px solid rgba(255,59,59,0.2); border-radius: 16px; padding: 28px; text-align: center; margin: 16px 0; }
+
+/* ── DIVIDER ── */
+.bb-divider { border: none; border-top: 1px solid #1a1a3a; margin: 20px 0; }
+
+/* ── HISTORY CARDS ── */
+.bb-history-card { background: #0c0c18; border: 1px solid #1a1a3a; border-radius: 12px; padding: 18px 22px; margin: 10px 0; transition: all 0.2s; cursor: pointer; }
+.bb-history-card:hover { border-color: rgba(255,59,59,0.3); transform: translateX(4px); }
+
+/* ── TABS ── */
+.stTabs [data-baseweb="tab-list"] { background: #0c0c18 !important; border-radius: 10px !important; padding: 4px !important; border: 1px solid #1a1a3a !important; gap: 4px !important; }
+.stTabs [data-baseweb="tab"] { background: transparent !important; color: #555580 !important; border-radius: 8px !important; font-size: 13px !important; font-weight: 500 !important; border: none !important; }
+.stTabs [aria-selected="true"] { background: #ff3b3b !important; color: white !important; font-weight: 700 !important; }
+
+/* ── EXPANDER ── */
+.streamlit-expanderHeader { background: #0c0c18 !important; border: 1px solid #1a1a3a !important; border-radius: 8px !important; color: #a0a0c0 !important; }
+
+/* ── DATAFRAME ── */
+.stDataFrame { border: 1px solid #1a1a3a !important; border-radius: 10px !important; }
+.stDataFrame td { color: #e8e8f0 !important; background: #0c0c18 !important; }
+.stDataFrame th { color: #555580 !important; background: #12122a !important; }
+
+/* ── CODE BLOCKS ── */
+.stCodeBlock { border: 1px solid #1a1a3a !important; border-radius: 10px !important; }
+
+/* ── SUCCESS/ERROR ── */
+.stSuccess { background: rgba(0,170,102,0.1) !important; border: 1px solid rgba(0,170,102,0.3) !important; color: #00dd88 !important; border-radius: 8px !important; }
+.stError { background: rgba(255,59,59,0.08) !important; border: 1px solid rgba(255,59,59,0.3) !important; color: #ff6b6b !important; border-radius: 8px !important; }
+.stInfo { background: rgba(100,100,255,0.08) !important; border: 1px solid rgba(100,100,255,0.2) !important; color: #8888ff !important; border-radius: 8px !important; }
+.stWarning { background: rgba(255,180,0,0.08) !important; border: 1px solid rgba(255,180,0,0.2) !important; color: #ffcc44 !important; border-radius: 8px !important; }
+
+/* ── LINE CHART ── */
+.stLineChart { border-radius: 12px !important; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #080810; }
+::-webkit-scrollbar-thumb { background: rgba(255,59,59,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,59,59,0.5); }
 </style>
 """, unsafe_allow_html=True)
 
-# ─── SIDEBAR ──────────────────────────────────────────────
+# â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with st.sidebar:
     st.markdown("""
     <div class="bb-logo">BREAKBOT</div>
-    <div class="bb-tagline">AI Red-Team Agent</div>
+    <div class="bb-tagline">
+        AI Red-Team Agent
+    </div>
     <div class="bb-divider"></div>
     """, unsafe_allow_html=True)
 
@@ -483,55 +200,60 @@ with st.sidebar:
     <div class="bb-nav-label">Navigation</div>
     """, unsafe_allow_html=True)
 
-    nav_items = ["Run Scan", "My History", "Dashboard"]
+    nav_items = ["Run Scan", "My History", 
+                 "Dashboard"]
     if st.session_state.get("is_admin", False):
         nav_items.append("Admin Panel")
 
     for item in nav_items:
         if st.session_state.nav_page == item:
-            st.markdown(f"""
-            <div class="bb-nav-active">{item}</div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="bb-nav-active">'
+                f'{item}</div>',
+                unsafe_allow_html=True)
         else:
-            if st.button(item, key=f"nav_{item}"):
+            if st.button(item, 
+                         key=f"nav_{item}"):
                 st.session_state.nav_page = item
                 st.rerun()
 
-    st.markdown('<div class="bb-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="bb-divider"></div>',
+        unsafe_allow_html=True)
 
     if st.session_state.nav_page == "Run Scan":
-        st.markdown("""
-        <div style='font-size:10px;color:#9999bb;
-            text-transform:uppercase;letter-spacing:2px;
-            font-weight:600;margin:16px 0 8px 0;'>
-            Input Mode
-        </div>""", unsafe_allow_html=True)
+        st.markdown(
+            '<div class="bb-nav-label">'
+            'Input Mode</div>',
+            unsafe_allow_html=True)
         mode = st.radio(
             "Select input mode",
             ["GitHub Repo", "Paste Code"],
             index=1,
-            label_visibility="visible")
+            label_visibility="collapsed")
     else:
         mode = "Paste Code"
 
-    st.markdown('<div class="bb-divider"></div>',
-                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="bb-divider"></div>',
+        unsafe_allow_html=True)
 
     if st.button("Logout", key="logout_btn"):
-        for key in list(st.session_state.keys()):
+        for key in list(
+                st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
 
     st.markdown("""
-    <div style='font-size:10px;color:#ccccdd;
-        text-align:center;margin-top:20px;
-        text-transform:uppercase;letter-spacing:1px;'>
+    <div style='margin-top:24px;
+        font-size:10px;color:#1a1a3a;
+        text-align:center;
+        text-transform:uppercase;
+        letter-spacing:1px;'>
         Powered by Google Gemini
     </div>
     """, unsafe_allow_html=True)
-
-# ─── PAGE: MY HISTORY ─────────────────────────────────────
+# â”€â”€â”€ PAGE: MY HISTORY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if st.session_state.nav_page == "My History":
     st.markdown("""
     <div class="step-header">
@@ -789,7 +511,7 @@ if st.session_state.nav_page == "My History":
         st.error(f"Could not load history: {e}")
     
     st.stop()
-# ─── PAGE: ADMIN PANEL ────────────────────────────────────
+# â”€â”€â”€ PAGE: ADMIN PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if st.session_state.nav_page == "Admin Panel":
     if not st.session_state.get("is_admin", False):
         st.error("Access denied")
@@ -854,7 +576,7 @@ if st.session_state.nav_page == "Dashboard":
     )
     st.stop()
 
-# ─── PAGE: RUN SCAN ───────────────────────────────────────
+# â”€â”€â”€ PAGE: RUN SCAN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown("""
 <div class="step-header">
     <div class="step-num">1</div>Input
@@ -917,7 +639,7 @@ else:
             st.session_state.report = ""
             st.session_state.fixes = []
 
-# ─── STEP 2: ANALYSIS ────────────────────────────────────
+# â”€â”€â”€ STEP 2: ANALYSIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if st.session_state.ingested_files:
     st.markdown("""
     <div class="step-header">
@@ -961,7 +683,7 @@ if st.session_state.ingested_files:
                 )
             st.markdown('</div>', unsafe_allow_html=True)
 
-# ─── STEP 3: ATTACK ───────────────────────────────────────
+# â”€â”€â”€ STEP 3: ATTACK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if st.session_state.analysis:
     st.markdown("""
     <div class="step-header">
@@ -984,7 +706,7 @@ if st.session_state.analysis:
         st.code(st.session_state.attack_code,
                 language="python")
 
-# ─── STEP 4: RUN & REPORT ─────────────────────────────────
+# â”€â”€â”€ STEP 4: RUN & REPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if st.session_state.attack_code:
     st.markdown("""
     <div class="step-header">
