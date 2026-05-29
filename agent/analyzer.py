@@ -14,57 +14,41 @@ logger = logging.getLogger(__name__)
 
 
 def safe_parse_json(text: str) -> dict:
-    """Safely parse JSON with multiple fallback strategies."""
+    """Safely parse JSON with specific error handling."""
     default = {
         "functions": [],
-        "weak_points": ["Analysis failed - please try again"],
-        "attack_surfaces": [],
+        "weak_points": ["Analysis failed - please retry"],
+        "attack_surfaces": []
     }
-
     if not text or len(text.strip()) < 5:
         return default
-
+    
+    # Strategy 1: Direct parse
     try:
         return json.loads(text)
-    except Exception:
+    except json.JSONDecodeError:
         pass
-
+    
+    # Strategy 2: Extract from markdown blocks
     try:
-        match = re.search(r"\{[^{}]*\}", text, re.DOTALL)
+        match = re.search(
+            r'```(?:json)?\s*(\{.*?\})\s*```',
+            text, re.DOTALL)
         if match:
-            return json.loads(match.group())
-    except Exception:
+            return json.loads(match.group(1))
+    except json.JSONDecodeError:
         pass
-
+    
+    # Strategy 3: Find outermost JSON object
     try:
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1:
-            return json.loads(text[start : end + 1])
-    except Exception:
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end > start:
+            return json.loads(text[start:end+1])
+    except json.JSONDecodeError:
         pass
-
-    try:
-        functions = re.findall(r'"functions"\s*:\s*\[(.*?)\]', text, re.DOTALL)
-        weak_points = re.findall(r'"weak_points"\s*:\s*\[(.*?)\]', text, re.DOTALL)
-        attack_surfaces = re.findall(r'"attack_surfaces"\s*:\s*\[(.*?)\]', text, re.DOTALL)
-
-        def extract_list(match):
-            if not match:
-                return []
-            items = re.findall(r'"([^"]+)"', match[0])
-            return items
-
-        result = {
-            "functions": extract_list(functions),
-            "weak_points": extract_list(weak_points),
-            "attack_surfaces": extract_list(attack_surfaces),
-        }
-        if result["weak_points"]:
-            return result
-    except Exception:
-        pass
-
+    
+    logger.error("All JSON parsing strategies failed")
     return default
 
 
@@ -81,8 +65,8 @@ class CodeAnalyzer:
         for f in files:
             combined += f"\n\n# FILE: {f['path']}\n{f['content']}"
 
-        if len(combined) > 12000:
-            combined = combined[:12000]
+        if len(combined) > 50000:
+            combined = combined[:50000]
 
         system = (
             "You are a code security expert. "

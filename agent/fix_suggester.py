@@ -1,4 +1,7 @@
+import json
 import logging
+import re
+
 from agent.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
@@ -21,7 +24,7 @@ class FixSuggester:
         )
         user = (
             f"Bug: {weak_point}\n\n"
-            f"Code:\n{original_code[:2000]}\n\n"
+            f"Code:\n{original_code[:5000]}\n\n"
             "Respond with ONLY this JSON:\n"
             '{"issue": "one line description",'
             '"fix_code": "corrected code snippet",'
@@ -35,11 +38,11 @@ class FixSuggester:
         )
 
         try:
-            import json, re
             response = re.sub(r'```json|```', '',
                             response).strip()
             return json.loads(response)
-        except Exception:
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning("Fix suggestion JSON parsing failed: %s", e)
             return {
                 "issue": weak_point,
                 "fix_code": "# Review this section manually",

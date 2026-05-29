@@ -2,11 +2,15 @@ import os
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import (
+    getSampleStyleSheet, ParagraphStyle)
 from reportlab.lib.units import inch
-from reportlab.platypus import (SimpleDocTemplate, Paragraph,
-    Spacer, Table, TableStyle, HRFlowable)
-from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, 
+    Table, TableStyle, HRFlowable, 
+    KeepTogether, PageBreak)
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.platypus import ListFlowable, ListItem
 
 
 def generate_pdf_report(
@@ -17,289 +21,314 @@ def generate_pdf_report(
     username: str,
     output_path: str = None
 ) -> str:
-    """Generate a professional PDF Bug Attack Report."""
-
+    """Generate a clean professional PDF report."""
+    
     if not output_path:
         os.makedirs("reports", exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = f"reports/{repo_name}_{timestamp}.pdf"
-
+        timestamp = datetime.now().strftime(
+            "%Y%m%d_%H%M%S")
+        output_path = (
+            f"reports/{repo_name}_{timestamp}.pdf")
+    
     doc = SimpleDocTemplate(
         output_path,
         pagesize=A4,
-        rightMargin=0.75*inch,
-        leftMargin=0.75*inch,
-        topMargin=0.75*inch,
-        bottomMargin=0.75*inch
+        rightMargin=inch,
+        leftMargin=inch,
+        topMargin=inch,
+        bottomMargin=inch,
+        title="BreakBot Bug Attack Report"
     )
-
+    
+    # Colors
     RED = colors.HexColor('#ff3b3b')
-    DARK = colors.HexColor('#0a0a0f')
-    GRAY = colors.HexColor('#a0a0b0')
-    GREEN = colors.HexColor('#00ff88')
-    YELLOW = colors.HexColor('#ffd700')
-
+    DARK = colors.HexColor('#1a1a2e')
+    LIGHT_GRAY = colors.HexColor('#f8f8fc')
+    MID_GRAY = colors.HexColor('#9999bb')
+    WHITE = colors.white
+    GREEN = colors.HexColor('#00aa66')
+    YELLOW = colors.HexColor('#cc8800')
+    
     styles = getSampleStyleSheet()
-
-    title_style = ParagraphStyle(
-        'Title',
-        parent=styles['Normal'],
-        fontSize=28,
-        textColor=RED,
+    
+    # Define styles
+    def make_style(name, **kwargs):
+        return ParagraphStyle(name, **kwargs)
+    
+    title_s = make_style('BBTitle',
+        fontSize=28, textColor=RED,
         fontName='Helvetica-Bold',
-        alignment=TA_CENTER,
-        spaceAfter=6
-    )
-    subtitle_style = ParagraphStyle(
-        'Subtitle',
-        parent=styles['Normal'],
-        fontSize=12,
-        textColor=GRAY,
+        alignment=TA_CENTER, spaceAfter=4)
+    
+    subtitle_s = make_style('BBSub',
+        fontSize=11, textColor=MID_GRAY,
         fontName='Helvetica',
-        alignment=TA_CENTER,
-        spaceAfter=20
-    )
-    heading_style = ParagraphStyle(
-        'Heading',
-        parent=styles['Normal'],
-        fontSize=14,
-        textColor=RED,
+        alignment=TA_CENTER, spaceAfter=24)
+    
+    heading_s = make_style('BBHead',
+        fontSize=13, textColor=RED,
         fontName='Helvetica-Bold',
-        spaceBefore=16,
-        spaceAfter=8
-    )
-    body_style = ParagraphStyle(
-        'Body',
-        parent=styles['Normal'],
-        fontSize=10,
-        textColor=colors.black,
+        spaceBefore=20, spaceAfter=8)
+    
+    body_s = make_style('BBBody',
+        fontSize=9, textColor=DARK,
         fontName='Helvetica',
-        spaceAfter=6,
-        leading=16
-    )
-
+        spaceAfter=4, leading=14,
+        wordWrap='CJK')
+    
+    small_s = make_style('BBSmall',
+        fontSize=8, textColor=MID_GRAY,
+        fontName='Helvetica',
+        spaceAfter=2)
+    
+    footer_s = make_style('BBFooter',
+        fontSize=8, textColor=MID_GRAY,
+        fontName='Helvetica',
+        alignment=TA_CENTER)
+    
     story = []
-
-    story.append(Spacer(1, 0.3*inch))
-    story.append(Paragraph("BREAKBOT", title_style))
-    story.append(Paragraph(
-        "AI Red-Team Bug Attack Report", subtitle_style))
-    story.append(HRFlowable(
-        width="100%", thickness=2, color=RED))
+    
+    # -- HEADER ----------------------------------
     story.append(Spacer(1, 0.2*inch))
-
-    meta_data = [
-        ["Repository", repo_name],
-        ["Scanned By", username],
-        ["Generated", datetime.now().strftime(
-            "%B %d, %Y at %H:%M")],
-        ["Total Tests", str(test_results.get("total", 0))],
-        ["Bugs Found", str(test_results.get("failed", 0))],
-    ]
-    meta_table = Table(meta_data,
-        colWidths=[2*inch, 4*inch])
-    meta_table.setStyle(TableStyle([
-        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 10),
-        ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0,0), (0,-1), RED),
-        ('ROWBACKGROUNDS', (0,0), (-1,-1),
-            [colors.HexColor('#f8f8f8'), colors.white]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
-        ('PADDING', (0,0), (-1,-1), 8),
-    ]))
-    story.append(meta_table)
-    story.append(Spacer(1, 0.3*inch))
-
+    story.append(Paragraph("BREAKBOT", title_s))
+    story.append(Paragraph(
+        "AI Red-Team Bug Attack Report", subtitle_s))
+    story.append(HRFlowable(
+        width="100%", thickness=2,
+        color=RED, spaceAfter=16))
+    
+    # -- METADATA TABLE ---------------------------
     weak_points = analysis.get("weak_points", [])
     bugs_found = test_results.get("failed", 0)
     total_tests = test_results.get("total", 0)
-
+    passed = test_results.get("passed", 0)
     score = calculate_security_score(
         len(weak_points), bugs_found, total_tests)
-    score_color = (
-        GREEN if score >= 80
-        else YELLOW if score >= 50
-        else RED
-    )
-
-    story.append(Paragraph(
-        "Security Score", heading_style))
-    score_data = [[
-        Paragraph(f"{score}/100", ParagraphStyle(
-            'Score',
-            parent=styles['Normal'],
-            fontSize=36,
-            textColor=score_color,
-            fontName='Helvetica-Bold',
-            alignment=TA_CENTER
-        )),
-        Paragraph(
-            get_score_label(score), ParagraphStyle(
-            'Label',
-            parent=styles['Normal'],
-            fontSize=14,
-            textColor=score_color,
-            fontName='Helvetica-Bold',
-            alignment=TA_CENTER
-        ))
-    ]]
-    score_table = Table(score_data,
-        colWidths=[3*inch, 3*inch])
-    score_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1),
-            colors.HexColor('#f0f0f0')),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('PADDING', (0,0), (-1,-1), 20),
-        ('GRID', (0,0), (-1,-1), 1, colors.lightgrey),
+    
+    meta = [
+        ["Repository:", repo_name or "pasted_code"],
+        ["Scanned By:", username],
+        ["Generated:", datetime.now().strftime(
+            "%B %d, %Y at %H:%M")],
+        ["Security Score:", f"{score}/100 - "
+         f"{get_score_label(score)}"],
+    ]
+    
+    meta_table = Table(meta,
+        colWidths=[1.5*inch, 4.5*inch])
+    meta_table.setStyle(TableStyle([
+        ('FONTNAME', (0,0), (0,-1),
+         'Helvetica-Bold'),
+        ('FONTNAME', (1,0), (1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('TEXTCOLOR', (0,0), (0,-1), RED),
+        ('TEXTCOLOR', (1,0), (1,-1), DARK),
+        ('ROWBACKGROUNDS', (0,0), (-1,-1),
+         [LIGHT_GRAY, WHITE]),
+        ('GRID', (0,0), (-1,-1), 0.3,
+         colors.HexColor('#e8e8f0')),
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
     ]))
-    story.append(score_table)
+    story.append(meta_table)
     story.append(Spacer(1, 0.2*inch))
-
+    
+    # -- ATTACK SUMMARY ---------------------------
     story.append(Paragraph(
-        "Attack Summary", heading_style))
-    summary_data = [
-        ["Metric", "Value", "Status"],
+        "Attack Summary", heading_s))
+    
+    summary = [
+        ["Metric", "Count", "Status"],
         ["Weak Points Found",
          str(len(weak_points)),
          "REVIEW REQUIRED" if weak_points else "CLEAN"],
         ["Tests Generated",
-         str(total_tests), ""],
+         str(total_tests), "-"],
         ["Tests Passed",
-         str(test_results.get("passed", 0)), "GOOD"],
+         str(passed), "GOOD" if passed > 0 else "-"],
         ["Bugs Detected",
          str(bugs_found),
          "CRITICAL" if bugs_found > 5
          else "WARNING" if bugs_found > 0
          else "CLEAN"],
     ]
-    summary_table = Table(summary_data,
-        colWidths=[2.5*inch, 1.5*inch, 2*inch])
+    
+    summary_table = Table(summary,
+        colWidths=[3*inch, 1*inch, 2*inch])
     summary_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), DARK),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (0,0), (-1,0), WHITE),
+        ('FONTNAME', (0,0), (-1,0),
+         'Helvetica-Bold'),
         ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 10),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
         ('ROWBACKGROUNDS', (0,1), (-1,-1),
-            [colors.white, colors.HexColor('#f8f8f8')]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
-        ('PADDING', (0,0), (-1,-1), 8),
+         [WHITE, LIGHT_GRAY]),
+        ('GRID', (0,0), (-1,-1), 0.3,
+         colors.HexColor('#e8e8f0')),
+        ('PADDING', (0,0), (-1,-1), 7),
         ('ALIGN', (1,0), (2,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
     story.append(summary_table)
-    story.append(Spacer(1, 0.2*inch))
-
+    
+    # -- WEAK POINTS ------------------------------
     if weak_points:
         story.append(Paragraph(
-            "Weak Points Identified", heading_style))
+            "Weak Points Identified", heading_s))
+        
         wp_data = [["#", "Description", "Severity"]]
         for i, wp in enumerate(weak_points, 1):
             severity = classify_severity(wp)
+            # Wrap long text in Paragraph for auto-wrap
             wp_data.append([
-                str(i), wp, severity
+                str(i),
+                Paragraph(wp[:300], body_s),
+                severity
             ])
-        wp_table = Table(wp_data,
-            colWidths=[0.4*inch, 4.5*inch, 1.1*inch])
-
-        severity_colors = {
+        
+        sev_colors = {
             "CRITICAL": colors.HexColor('#ff0000'),
             "HIGH": RED,
             "MEDIUM": YELLOW,
             "LOW": GREEN,
         }
-
+        
+        wp_table = Table(wp_data,
+            colWidths=[
+                0.3*inch, 4.5*inch, 0.8*inch],
+            repeatRows=1)
+        
         style_cmds = [
             ('BACKGROUND', (0,0), (-1,0), DARK),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
-            ('FONTSIZE', (0,0), (-1,-1), 9),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+            ('TEXTCOLOR', (0,0), (-1,0), WHITE),
+            ('FONTNAME', (0,0), (-1,0),
+             'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 8),
+            ('GRID', (0,0), (-1,-1), 0.3,
+             colors.HexColor('#e8e8f0')),
             ('PADDING', (0,0), (-1,-1), 6),
             ('ROWBACKGROUNDS', (0,1), (-1,-1),
-                [colors.white, colors.HexColor('#f8f8f8')]),
+             [WHITE, LIGHT_GRAY]),
             ('ALIGN', (0,0), (0,-1), 'CENTER'),
             ('ALIGN', (2,0), (2,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
         ]
         for i, wp in enumerate(weak_points, 1):
             severity = classify_severity(wp)
-            color = severity_colors.get(
-                severity, colors.gray)
+            c = sev_colors.get(severity, MID_GRAY)
             style_cmds.append((
-                'TEXTCOLOR', (2,i), (2,i), color
-            ))
+                'TEXTCOLOR', (2,i), (2,i), c))
             style_cmds.append((
                 'FONTNAME', (2,i), (2,i),
-                'Helvetica-Bold'
-            ))
-
+                'Helvetica-Bold'))
+        
         wp_table.setStyle(TableStyle(style_cmds))
         story.append(wp_table)
-        story.append(Spacer(1, 0.2*inch))
-
+    
+    # -- BUGS DETECTED ----------------------------
     failures = test_results.get("failures", [])
     if failures:
         story.append(Paragraph(
-            "Bugs Detected", heading_style))
+            "Bugs Detected", heading_s))
         for i, failure in enumerate(failures, 1):
-            story.append(Paragraph(
-                f"Bug #{i}: {failure.get('test_name', '')}",
-                ParagraphStyle(
-                    'BugTitle',
-                    parent=styles['Normal'],
-                    fontSize=11,
-                    textColor=RED,
-                    fontName='Helvetica-Bold',
-                    spaceBefore=10
-                )
-            ))
-            story.append(Paragraph(
-                f"Error: {failure.get('error', 'Unknown')}",
-                body_style
-            ))
-            if failure.get("fix"):
-                story.append(Paragraph(
-                    f"Fix: {failure.get('fix', '')}",
-                    ParagraphStyle(
-                        'Fix',
-                        parent=styles['Normal'],
-                        fontSize=10,
-                        textColor=colors.HexColor('#006600'),
-                        fontName='Helvetica',
-                        spaceAfter=6
-                    )
-                ))
-
+            bug_data = [
+                [Paragraph(
+                    f"Bug #{i}: "
+                    f"{failure.get('test_name','Unknown')}",
+                    make_style(f'BT{i}',
+                        fontSize=9,
+                        textColor=RED,
+                        fontName='Helvetica-Bold')
+                )],
+                [Paragraph(
+                    f"Error: "
+                    f"{failure.get('error','')[:300]}",
+                    body_s
+                )],
+            ]
+            bug_table = Table(bug_data,
+                colWidths=[5.5*inch])
+            bug_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1),
+                 colors.HexColor('#fff5f5')),
+                ('BOX', (0,0), (-1,-1), 1,
+                 colors.HexColor('#ffdddd')),
+                ('LEFTPADDING', (0,0), (-1,-1), 10),
+                ('RIGHTPADDING', (0,0), (-1,-1), 10),
+                ('TOPPADDING', (0,0), (-1,-1), 8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ]))
+            story.append(bug_table)
+            story.append(Spacer(1, 6))
+    
+    # -- FIX SUGGESTIONS --------------------------
     if fixes:
         story.append(Paragraph(
-            "Fix Suggestions", heading_style))
+            "Fix Suggestions", heading_s))
         for i, fix in enumerate(fixes, 1):
-            story.append(Paragraph(
-                f"Fix #{i}: {fix.get('issue', '')}",
-                body_style
-            ))
-            story.append(Paragraph(
-                fix.get("explanation", ""),
-                body_style
-            ))
-
+            items = [
+                Paragraph(
+                    f"Fix #{i}: "
+                    f"{fix.get('weak_point','')[:100]}",
+                    make_style(f'FT{i}',
+                        fontSize=9,
+                        textColor=RED,
+                        fontName='Helvetica-Bold',
+                        spaceAfter=4)
+                ),
+                Paragraph(
+                    f"Issue: {fix.get('issue','')}",
+                    body_s),
+                Paragraph(
+                    f"Explanation: "
+                    f"{fix.get('explanation','')}",
+                    body_s),
+            ]
+            fix_code = fix.get('fix_code','')
+            if fix_code and len(fix_code) > 10:
+                items.append(Paragraph(
+                    f"Fix: {fix_code[:400]}",
+                    make_style(f'FC{i}',
+                        fontSize=8,
+                        textColor=DARK,
+                        fontName='Courier',
+                        spaceAfter=4,
+                        backColor=LIGHT_GRAY,
+                        leading=12)
+                ))
+            
+            fix_content = [[item] for item in items]
+            fix_table = Table(
+                fix_content,
+                colWidths=[5.5*inch])
+            fix_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1),
+                 colors.HexColor('#f8f8fc')),
+                ('BOX', (0,0), (-1,-1), 0.5,
+                 colors.HexColor('#e8e8f0')),
+                ('LEFTPADDING', (0,0), (-1,-1), 12),
+                ('RIGHTPADDING', (0,0), (-1,-1), 12),
+                ('TOPPADDING', (0,0), (-1,-1), 8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ]))
+            story.append(fix_table)
+            story.append(Spacer(1, 8))
+    
+    # -- FOOTER -----------------------------------
     story.append(Spacer(1, 0.3*inch))
     story.append(HRFlowable(
-        width="100%", thickness=1, color=GRAY))
+        width="100%", thickness=0.5,
+        color=colors.HexColor('#e8e8f0')))
+    story.append(Spacer(1, 8))
     story.append(Paragraph(
-        "Generated by BreakBot - AI Red-Team Security Agent",
-        ParagraphStyle(
-            'Footer',
-            parent=styles['Normal'],
-            fontSize=8,
-            textColor=GRAY,
-            alignment=TA_CENTER,
-            spaceBefore=8
-        )
-    ))
-
+        "Generated by BreakBot - "
+        "AI Red-Team Security Agent | "
+        f"{datetime.now().strftime('%B %d, %Y')}",
+        footer_s))
+    
     doc.build(story)
     return output_path
 
@@ -309,44 +338,41 @@ def calculate_security_score(
     bugs: int,
     total_tests: int
 ) -> int:
-    """Calculate security score out of 100."""
     score = 100
     score -= weak_points * 5
     score -= bugs * 10
     if total_tests > 0:
-        pass_rate = (total_tests - bugs) / total_tests
+        pass_rate = max(0,
+            (total_tests - bugs) / total_tests)
         score = int(score * pass_rate)
     return max(0, min(100, score))
 
 
 def get_score_label(score: int) -> str:
-    """Get label for security score."""
-    if score >= 80:
-        return "SECURE"
-    elif score >= 60:
-        return "MODERATE"
-    elif score >= 40:
-        return "VULNERABLE"
-    else:
-        return "CRITICAL RISK"
+    if score >= 80: return "SECURE"
+    elif score >= 60: return "MODERATE RISK"
+    elif score >= 40: return "VULNERABLE"
+    else: return "CRITICAL RISK"
 
 
 def classify_severity(weak_point: str) -> str:
-    """Classify severity of a weak point."""
     text = weak_point.lower()
-    if any(word in text for word in [
-        'sql injection', 'injection', 'password',
-        'credential', 'auth', 'overflow'
+    if any(w in text for w in [
+        'sql injection', 'injection', 'arbitrary code',
+        'execution', 'password', 'credential',
+        'overflow', 'authentication'
     ]):
         return "CRITICAL"
-    elif any(word in text for word in [
+    elif any(w in text for w in [
         'division', 'crash', 'null', 'none',
-        'error', 'exception', 'unsafe'
+        'error', 'exception', 'naming conflict',
+        'syntax error', 'unsafe'
     ]):
         return "HIGH"
-    elif any(word in text for word in [
-        'file', 'resource', 'leak', 'handle',
-        'type', 'index', 'boundary'
+    elif any(w in text for w in [
+        'truncat', 'file', 'resource', 'leak',
+        'handle', 'type', 'index', 'boundary',
+        'incomplete'
     ]):
         return "MEDIUM"
     else:
