@@ -55,6 +55,9 @@ st.markdown("""
     background: #ffffff !important;
     color: #1a1a2e !important;
 }
+body { color: #1a1a2e !important; }
+p { color: #333355 !important; }
+h1, h2, h3 { color: #1a1a2e !important; }
 
 /* Hide unwanted elements */
 /* Hide sidebar collapse button completely */
@@ -388,6 +391,22 @@ div[data-testid="stButton"] button[kind="primary"],
 }
 [data-testid="stRadio"] span {
     color: #333355 !important;
+}
+/* Radio button fix */
+.stRadio > label {
+    color: #333355 !important;
+}
+.stRadio [data-testid="stMarkdownContainer"] p {
+    color: #333355 !important;
+    background: transparent !important;
+}
+div[role="radiogroup"] label {
+    color: #333355 !important;
+    background: transparent !important;
+}
+div[role="radiogroup"] label span {
+    color: #333355 !important;
+    background: transparent !important;
 }
 
 /* Tabs */

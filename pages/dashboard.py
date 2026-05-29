@@ -7,20 +7,24 @@ def show_dashboard(username: str, is_admin: bool = False):
     """Show user dashboard with charts."""
     st.markdown("""
     <style>
-    * { color: #1a1a2e !important; }
     .stApp { background: #ffffff !important; }
-    h1, h2, h3 { color: #ff3b3b !important; }
-    p, span, div { color: #333355; }
+    [data-testid="stMetric"] {
+        background: #ffffff !important;
+        border: 1.5px solid #ebebf5 !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+    }
     [data-testid="stMetricValue"] { 
         color: #ff3b3b !important; 
+        font-size: 36px !important;
         font-weight: 800 !important;
     }
     [data-testid="stMetricLabel"] { 
-        color: #9999bb !important; 
+        color: #555580 !important;
+        font-size: 12px !important;
     }
-    .stDataFrame { 
-        color: #1a1a2e !important; 
-    }
+    .stDataFrame td { color: #1a1a2e !important; }
+    .stDataFrame th { color: #555580 !important; }
     </style>
     """, unsafe_allow_html=True)
     st.markdown("""
