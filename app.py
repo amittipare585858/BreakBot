@@ -57,6 +57,25 @@ st.markdown("""
 }
 
 /* Hide unwanted elements */
+/* Hide sidebar collapse button completely */
+[data-testid="stSidebarCollapseButton"] {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+}
+button[data-testid="stSidebarCollapseButton"] {
+    display: none !important;
+}
+/* Hide ALL header buttons */
+[data-testid="stHeader"] button {
+    display: none !important;
+}
+[data-testid="stHeader"] {
+    background: transparent !important;
+    height: 0 !important;
+    min-height: 0 !important;
+}
 [data-testid="stSidebarNav"] { display:none !important; }
 [data-testid="stSidebarNavItems"] { display:none !important; }
 ul[data-testid="stSidebarNavItems"] { display:none !important; }
@@ -412,9 +431,6 @@ div[data-testid="stButton"] button[kind="primary"],
 footer { visibility: hidden; }
 [data-testid="stToolbar"] { display: none; }
 [data-testid="stDecoration"] { display: none; }
-[data-testid="stSidebarCollapseButton"] {
-    display: none !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -976,3 +992,4 @@ if st.session_state.attack_code:
                     )
             except Exception as e:
                 st.error(f"PDF generation error: {e}")
+
