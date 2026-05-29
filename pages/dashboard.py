@@ -6,6 +6,24 @@ from database import get_user_history, get_supabase
 def show_dashboard(username: str, is_admin: bool = False):
     """Show user dashboard with charts."""
     st.markdown("""
+    <style>
+    * { color: #1a1a2e !important; }
+    .stApp { background: #ffffff !important; }
+    h1, h2, h3 { color: #ff3b3b !important; }
+    p, span, div { color: #333355; }
+    [data-testid="stMetricValue"] { 
+        color: #ff3b3b !important; 
+        font-weight: 800 !important;
+    }
+    [data-testid="stMetricLabel"] { 
+        color: #9999bb !important; 
+    }
+    .stDataFrame { 
+        color: #1a1a2e !important; 
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown("""
     <div style='font-size:24px; font-weight:700;
         color:#ff3b3b; margin-bottom:20px;'>
         Dashboard
@@ -22,16 +40,64 @@ def show_dashboard(username: str, is_admin: bool = False):
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Total Scans", len(df))
+        st.markdown(f"""
+        <div style='background:#ffffff;
+            border:1.5px solid #ebebf5;
+            border-radius:12px;padding:20px;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='font-size:36px;font-weight:800;
+                color:#ff3b3b;'>{len(df)}</div>
+            <div style='font-size:11px;color:#9999bb;
+                text-transform:uppercase;letter-spacing:1px;
+                margin-top:4px;font-weight:600;'>
+                Total Scans</div>
+        </div>""", unsafe_allow_html=True)
     with col2:
-        st.metric("Total Bugs Found",
-                  int(df["bugs_found"].sum()))
+        st.markdown(f"""
+        <div style='background:#ffffff;
+            border:1.5px solid #ebebf5;
+            border-radius:12px;padding:20px;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='font-size:36px;font-weight:800;
+                color:#ff3b3b;'>
+                {int(df["bugs_found"].sum())}</div>
+            <div style='font-size:11px;color:#9999bb;
+                text-transform:uppercase;letter-spacing:1px;
+                margin-top:4px;font-weight:600;'>
+                Total Bugs Found</div>
+        </div>""", unsafe_allow_html=True)
     with col3:
-        st.metric("Avg Bugs Per Scan",
-                  round(df["bugs_found"].mean(), 1))
+        st.markdown(f"""
+        <div style='background:#ffffff;
+            border:1.5px solid #ebebf5;
+            border-radius:12px;padding:20px;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='font-size:36px;font-weight:800;
+                color:#ff3b3b;'>
+                {round(df["bugs_found"].mean(), 1)}</div>
+            <div style='font-size:11px;color:#9999bb;
+                text-transform:uppercase;letter-spacing:1px;
+                margin-top:4px;font-weight:600;'>
+                Avg Bugs Per Scan</div>
+        </div>""", unsafe_allow_html=True)
     with col4:
-        st.metric("Weak Points Found",
-                  int(df["weak_points_found"].sum()))
+        st.markdown(f"""
+        <div style='background:#ffffff;
+            border:1.5px solid #ebebf5;
+            border-radius:12px;padding:20px;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='font-size:36px;font-weight:800;
+                color:#ff3b3b;'>
+                {int(df["weak_points_found"].sum())}</div>
+            <div style='font-size:11px;color:#9999bb;
+                text-transform:uppercase;letter-spacing:1px;
+                margin-top:4px;font-weight:600;'>
+                Weak Points Found</div>
+        </div>""", unsafe_allow_html=True)
 
     st.markdown("---")
 

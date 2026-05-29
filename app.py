@@ -376,8 +376,18 @@ div[data-testid="stButton"] button[kind="primary"],
 
 /* Radio buttons */
 .stRadio label {
-    color: #555580 !important;
+    color: #333355 !important;
     font-size: 13px !important;
+    font-weight: 500 !important;
+}
+.stRadio > div {
+    gap: 8px !important;
+}
+[data-testid="stRadio"] label {
+    color: #333355 !important;
+}
+[data-testid="stRadio"] span {
+    color: #333355 !important;
 }
 
 /* Tabs */
@@ -472,13 +482,17 @@ with st.sidebar:
                 unsafe_allow_html=True)
 
     if st.session_state.nav_page == "Run Scan":
-        st.markdown(
-            '<div class="bb-nav-label">Input Mode</div>',
-            unsafe_allow_html=True)
-        mode = st.radio("",
+        st.markdown("""
+        <div style='font-size:10px;color:#9999bb;
+            text-transform:uppercase;letter-spacing:2px;
+            font-weight:600;margin:16px 0 8px 0;'>
+            Input Mode
+        </div>""", unsafe_allow_html=True)
+        mode = st.radio(
+            "Select input mode",
             ["GitHub Repo", "Paste Code"],
             index=1,
-            label_visibility="collapsed")
+            label_visibility="visible")
     else:
         mode = "Paste Code"
 
