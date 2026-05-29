@@ -535,48 +535,202 @@ with st.sidebar:
 if st.session_state.nav_page == "My History":
     st.markdown("""
     <div class="step-header">
+        <div class="step-num">H</div>
         My Scan History
     </div>
     """, unsafe_allow_html=True)
+    
     try:
         from database import get_user_history
         history = get_user_history(
             st.session_state.username)
+        
         if not history:
-            st.info(
-                "No scans yet! "
-                "Go to Run Scan to analyze your first repo.")
+            st.markdown("""
+            <div style='background:#ffffff;
+                border:1.5px solid #ebebf5;
+                border-radius:12px;
+                padding:40px;
+                text-align:center;
+                color:#9999bb;'>
+                No scans yet. 
+                Run your first scan to see history!
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            for i, scan in enumerate(history):
+            # Show selected scan detail
+            if "selected_scan" not in st.session_state:
+                st.session_state.selected_scan = None
+            
+            # If a scan is selected show its detail
+            if st.session_state.selected_scan is not None:
+                scan = history[
+                    st.session_state.selected_scan]
+                
+                # Back button
+                if st.button(
+                    "Back to History", 
+                    key="back_btn"):
+                    st.session_state.selected_scan = None
+                    st.rerun()
+                
                 st.markdown(f"""
-                <div style='background:#16213e;
-                    border:1px solid #ff3b3b20;
-                    border-radius:10px;
-                    padding:16px; margin:8px 0;'>
-                    <div style='color:#ff3b3b; font-weight:700;'>
-                        Scan {i + 1} |
-                        {str(scan.get('scanned_at',''))[:16]} |
-                        Bugs: {scan.get('bugs_found', 0)}
+                <div style='background:#ffffff;
+                    border:1.5px solid #ebebf5;
+                    border-radius:12px;
+                    padding:24px;
+                    margin:16px 0;
+                    box-shadow:0 2px 8px 
+                        rgba(0,0,0,0.06);'>
+                    <div style='font-size:16px;
+                        font-weight:700;
+                        color:#1a1a2e;
+                        margin-bottom:4px;'>
+                        {scan.get('code_snippet',
+                            'pasted_code')[:30]}...
+                    </div>
+                    <div style='font-size:11px;
+                        color:#9999bb;'>
+                        Scanned: 
+                        {str(scan.get(
+                            'scanned_at',''))[:16]}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Metrics
                 c1, c2 = st.columns(2)
                 with c1:
-                    st.metric("Weak Points",
-                        scan.get('weak_points_found', 0))
+                    st.markdown(f"""
+                    <div class="bb-metric">
+                        <div class="bb-metric-val"
+                            style="color:#ff3b3b;">
+                            {scan.get(
+                                'weak_points_found',0)}
+                        </div>
+                        <div class="bb-metric-label">
+                            Weak Points
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 with c2:
-                    st.metric("Bugs Found",
-                        scan.get('bugs_found', 0))
-                if scan.get("code_snippet"):
-                    st.markdown("**Code Snippet:**")
-                    st.code(scan["code_snippet"])
+                    st.markdown(f"""
+                    <div class="bb-metric">
+                        <div class="bb-metric-val"
+                            style="color:#ff3b3b;">
+                            {scan.get('bugs_found',0)}
+                        </div>
+                        <div class="bb-metric-label">
+                            Bugs Found
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                # Report content
                 if scan.get("report_content"):
-                    st.markdown(scan["report_content"][:500])
-                st.markdown("---")
+                    st.markdown("---")
+                    st.markdown("**Full Report:**")
+                    st.markdown(
+                        scan["report_content"][:2000])
+            
+            else:
+                # Show list of scans as cards
+                st.markdown(f"""
+                <div style='font-size:13px;
+                    color:#9999bb;
+                    margin-bottom:16px;'>
+                    {len(history)} scan(s) found. 
+                    Click any scan to view details.
+                </div>
+                """, unsafe_allow_html=True)
+                
+                for i, scan in enumerate(history):
+                    # Get scan name from code snippet
+                    snippet = scan.get(
+                        'code_snippet', '')
+                    scan_name = (
+                        snippet[:40].strip() 
+                        if snippet 
+                        else f"Scan #{i+1}"
+                    )
+                    date = str(scan.get(
+                        'scanned_at', ''))[:16]
+                    bugs = scan.get('bugs_found', 0)
+                    wps = scan.get(
+                        'weak_points_found', 0)
+                    
+                    # Severity color
+                    bug_color = (
+                        "#ff3b3b" if bugs > 3
+                        else "#cc8800" if bugs > 0
+                        else "#00aa66"
+                    )
+                    
+                    st.markdown(f"""
+                    <div style='background:#ffffff;
+                        border:1.5px solid #ebebf5;
+                        border-radius:12px;
+                        padding:16px 20px;
+                        margin:8px 0;
+                        box-shadow:0 2px 6px 
+                            rgba(0,0,0,0.05);
+                        cursor:pointer;
+                        transition:all 0.2s;'>
+                        <div style='display:flex;
+                            justify-content:space-between;
+                            align-items:center;'>
+                            <div>
+                                <div style='font-size:14px;
+                                    font-weight:600;
+                                    color:#1a1a2e;
+                                    margin-bottom:4px;'>
+                                    Scan #{i+1}
+                                </div>
+                                <div style='font-size:12px;
+                                    color:#9999bb;'>
+                                    {date}
+                                </div>
+                            </div>
+                            <div style='display:flex;
+                                gap:12px;
+                                align-items:center;'>
+                                <div style='text-align:center;'>
+                                    <div style='font-size:18px;
+                                        font-weight:700;
+                                        color:#555580;'>
+                                        {wps}
+                                    </div>
+                                    <div style='font-size:10px;
+                                        color:#9999bb;'>
+                                        Weak Points
+                                    </div>
+                                </div>
+                                <div style='text-align:center;'>
+                                    <div style='font-size:18px;
+                                        font-weight:700;
+                                        color:{bug_color};'>
+                                        {bugs}
+                                    </div>
+                                    <div style='font-size:10px;
+                                        color:#9999bb;'>
+                                        Bugs
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    if st.button(
+                        f"View Details",
+                        key=f"scan_btn_{i}"):
+                        st.session_state.selected_scan = i
+                        st.rerun()
+                    
     except Exception as e:
         st.error(f"Could not load history: {e}")
+    
     st.stop()
-
 # ─── PAGE: ADMIN PANEL ────────────────────────────────────
 if st.session_state.nav_page == "Admin Panel":
     if not st.session_state.get("is_admin", False):

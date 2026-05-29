@@ -56,14 +56,20 @@ def generate_pdf_report(
         return ParagraphStyle(name, **kwargs)
     
     title_s = make_style('BBTitle',
-        fontSize=28, textColor=RED,
+        fontSize=26,
+        textColor=RED,
         fontName='Helvetica-Bold',
-        alignment=TA_CENTER, spaceAfter=4)
+        alignment=TA_CENTER,
+        spaceAfter=16,
+        spaceBefore=8)
     
     subtitle_s = make_style('BBSub',
-        fontSize=11, textColor=MID_GRAY,
+        fontSize=11,
+        textColor=MID_GRAY,
         fontName='Helvetica',
-        alignment=TA_CENTER, spaceAfter=24)
+        alignment=TA_CENTER,
+        spaceAfter=20,
+        spaceBefore=0)
     
     heading_s = make_style('BBHead',
         fontSize=13, textColor=RED,
@@ -89,13 +95,16 @@ def generate_pdf_report(
     story = []
     
     # -- HEADER ----------------------------------
-    story.append(Spacer(1, 0.2*inch))
+    story.append(Spacer(1, 0.3*inch))
     story.append(Paragraph("BREAKBOT", title_s))
+    story.append(Spacer(1, 0.15*inch))
     story.append(Paragraph(
         "AI Red-Team Bug Attack Report", subtitle_s))
+    story.append(Spacer(1, 0.15*inch))
     story.append(HRFlowable(
         width="100%", thickness=2,
-        color=RED, spaceAfter=16))
+        color=RED, spaceAfter=20))
+    story.append(Spacer(1, 0.1*inch))
     
     # -- METADATA TABLE ---------------------------
     weak_points = analysis.get("weak_points", [])
