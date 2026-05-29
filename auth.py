@@ -193,14 +193,6 @@ def show_login_page():
         </div>
         """, unsafe_allow_html=True)
 
-        # Login card
-        st.markdown("""
-        <div style='background: #ffffff;
-                    border: 1.5px solid #ebebf5;
-                    border-radius: 16px;
-                    padding: 32px 28px;
-                    box-shadow: 0 8px 40px rgba(0,0,0,0.08);'>
-        """, unsafe_allow_html=True)
 
         tab1, tab2 = st.tabs(["Login", "Register"])
 
@@ -310,7 +302,6 @@ def show_login_page():
                     else:
                         st.error(result["error"])
 
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def show_user_history():
