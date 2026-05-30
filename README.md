@@ -1,20 +1,19 @@
-<<<<<<< HEAD
 # BreakBot
 
-BreakBot is an AI red-team agent that analyzes codebases, generates adversarial pytest cases, runs them in a sandboxed subprocess, and produces structured Bug Attack Reports in Markdown and JSON.
+BreakBot is a full-stack AI red-team web application that analyzes code, generates adversarial pytest cases, runs them through the local test pipeline, and produces bug attack reports with fix suggestions.
 
-It accepts a public GitHub repository URL or pasted code, uses Google Gemini to reason about functions and weak points, generates hostile edge-case tests, runs them with pytest, and asks the LLM for fix suggestions for failed attacks.
+The rebuilt app uses a FastAPI backend in `api.py` and a pure HTML/CSS/JS frontend in `index.html`. It does not depend on Streamlit.
 
 ## Tech Stack
 
 | Layer | Technology |
 | --- | --- |
-| Backend | Python 3.11+ |
-| LLM | Google Gemini API, `gemini-1.5-flash` |
-| UI | Streamlit |
+| Backend | Python 3.11+ and FastAPI |
+| Frontend | Plain HTML, CSS, and JavaScript |
+| LLM | Google Gemini API |
 | Repo ingestion | GitHub REST API and raw.githubusercontent.com |
-| Test runner | Python `subprocess` + pytest |
-| Reports | Markdown + JSON |
+| Test runner | Python subprocess and pytest |
+| Reports | Markdown and JSON |
 | Config | `.env` via `python-dotenv` |
 
 ## Setup
@@ -35,12 +34,18 @@ GEMINI_API_KEY=your_gemini_key_here
 ## Run
 
 ```powershell
-streamlit run app.py
+uvicorn api:app --reload
+```
+
+Open the app at:
+
+```text
+http://127.0.0.1:8000
 ```
 
 ## Example Use Case
 
-1. Open the Streamlit app.
+1. Open the FastAPI-served web app.
 2. Choose `Paste Code`.
 3. Paste a fragile function such as:
 
@@ -49,11 +54,11 @@ def divide(a, b):
     return a / b
 ```
 
-4. Click `Analyze Code`.
+4. Click `Analyze`.
 5. Review weak points.
-6. Click `⚔️ Launch Attack`.
-7. Click `🧪 Run Tests`.
-8. Download the Bug Attack Report from the UI.
+6. Click `Generate Attack`.
+7. Click `Run Full Report`.
+8. Review the Bug Attack Report in the UI.
 
 Reports are saved automatically:
 
@@ -65,63 +70,58 @@ reports/{repo_name}_{timestamp}.json
 ## Architecture
 
 ```text
-                +----------------------+
-                |   Streamlit app.py   |
-                +----------+-----------+
-                           |
-             +-------------+-------------+
-             |                           |
-  +----------v----------+     +----------v----------+
-  | GitHub Repo Input   |     | Pasted Code Input   |
-  +----------+----------+     +----------+----------+
-             |                           |
-             +-------------+-------------+
-                           |
-                  +--------v--------+
-                  | agent/ingester  |
-                  +--------+--------+
-                           |
-                  +--------v--------+
-                  | agent/analyzer  |---- Gemini ANALYZE_PROMPT
-                  +--------+--------+
-                           |
-                  +--------v--------+
-                  | agent/attacker  |---- Gemini ATTACK_GEN_PROMPT
-                  +--------+--------+
-                           |
-                  +--------v--------+
-                  | agent/runner    |---- pytest subprocess
-                  +--------+--------+
-                           |
-                  +--------v--------+
-                  | agent/reporter  |---- Gemini FIX_SUGGEST_PROMPT
-                  +--------+--------+
-                           |
-             +-------------v-------------+
-             | reports/*.md + reports/*.json |
-             +---------------------------+
+                +--------------------------+
+                | FastAPI api.py + index.html |
+                +------------+-------------+
+                             |
+             +---------------+---------------+
+             |                               |
+  +----------v----------+         +----------v----------+
+  | GitHub Repo Input   |         | Pasted Code Input   |
+  +----------+----------+         +----------+----------+
+             |                               |
+             +---------------+---------------+
+                             |
+                    +--------v--------+
+                    | agent/ingester  |
+                    +--------+--------+
+                             |
+                    +--------v--------+
+                    | agent/analyzer  |
+                    +--------+--------+
+                             |
+                    +--------v--------+
+                    | agent/attacker  |
+                    +--------+--------+
+                             |
+                    +--------v--------+
+                    | agent/runner    |
+                    +--------+--------+
+                             |
+                    +--------v--------+
+                    | agent/reporter  |
+                    +--------+--------+
+                             |
+               +-------------v-------------+
+               | reports/*.md + reports/*.json |
+               +---------------------------+
 ```
 
 ## Project Structure
 
 ```text
 agent/
-  analyzer.py          # Gemini JSON analysis with chunking and fallback
+  analyzer.py          # Gemini JSON analysis with fallback parsing
   attacker.py          # Adversarial pytest generation
-  llm_client.py        # Gemini client using .env
-  fixer.py             # Single-fix compatibility helper
-  ingester.py          # GitHub and pasted-code ingestion
-  reporter.py          # Markdown/JSON reports and fix suggestions
-  runner.py            # Sandboxed subprocess pytest runner
-utils/
-  prompt_templates.py  # LLM prompt constants
-app.py                 # Dark-themed Streamlit workflow
+  fix_suggester.py     # Fix suggestion generation
+  ingester.py          # GitHub repository ingestion
+  reporter.py          # Markdown/JSON reports
+  runner.py            # Subprocess pytest runner
+api.py                 # FastAPI backend
+index.html             # Pure HTML/CSS/JS frontend
 requirements.txt       # Runtime and dev dependencies
 ```
 
 ## Safety
 
 BreakBot runs generated tests in a subprocess, and it never uses `exec()` or `eval()` to execute generated test code. A subprocess is not a full security sandbox, so run BreakBot in a disposable environment or container when testing unknown repositories.
-=======
-# BreakBot
->>>>>>> 21d6e42691b35b1db81d4cf60b5687f148d9a0b0

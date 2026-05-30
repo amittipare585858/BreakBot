@@ -16,15 +16,8 @@ class LLMClient:
     """Google Gemini API client wrapper for BreakBot."""
 
     def __init__(self):
-        """Initialize Gemini using Streamlit secrets first, then the .env file."""
+        """Initialize Gemini using the GEMINI_API_KEY environment variable."""
         api_key = None
-        try:
-            import streamlit as st
-
-            api_key = st.secrets.get("GEMINI_API_KEY")
-        except Exception:
-            pass
-
         if not api_key:
             from dotenv import load_dotenv
 
@@ -32,7 +25,7 @@ class LLMClient:
             api_key = os.getenv("GEMINI_API_KEY")
 
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in secrets or .env")
+            raise ValueError("GEMINI_API_KEY not found in environment or .env")
 
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name="gemini-2.5-flash")

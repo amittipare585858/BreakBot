@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import os
 
-import streamlit as st
 
 
 def get_supabase():
@@ -13,17 +12,7 @@ def get_supabase():
         from supabase import create_client
         url = None
         key = None
-
-        # Try Streamlit secrets first
-        try:
-            import streamlit as st
-
-            url = st.secrets.get("SUPABASE_URL", "")
-            key = st.secrets.get("SUPABASE_KEY", "")
-        except Exception:
-            pass
-
-        # Fall back to .env
+        # Load Supabase credentials from environment variables.
         if not url or not key:
             from dotenv import load_dotenv
 

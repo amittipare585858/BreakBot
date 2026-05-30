@@ -1,4 +1,5 @@
-streamlit
+fastapi
+uvicorn
 google-generativeai
 requests
 pytest
@@ -6,3 +7,4 @@ python-dotenv
 supabase
 pandas
 reportlab
+httpx

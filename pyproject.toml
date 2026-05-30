@@ -4,11 +4,15 @@ version = "0.1.0"
 description = "AI red-team agent for adversarial code testing and bug attack reports."
 requires-python = ">=3.11"
 dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
   "google-generativeai",
   "pytest",
   "python-dotenv",
   "requests",
-  "streamlit",
+  "supabase",
+  "pandas",
+  "reportlab",
 ]
 
 [tool.pytest.ini_options]
